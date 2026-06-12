@@ -1,19 +1,22 @@
-# TAG Gestão de Segurança
+# TAG Gestão de Segurança — Frontend
 
-Sistema web para gestão de escalas, eventos e pagamentos da TAG Segurança.
+Frontend web administrativo do sistema TAG Gestão de Segurança.
 
 ## Objetivo
 
-O sistema tem como objetivo substituir o controle manual feito em planilhas, permitindo que a TAG gerencie funcionários, casas de evento, tipos de evento, eventos, escalas, pagamentos pendentes e relatórios.
+Este repositório contém a interface web do sistema TAG, responsável por permitir que a gestão da empresa controle funcionários, casas de evento, tipos de evento, eventos, escalas, pagamentos pendentes e relatórios.
 
-## Stack
+O backend/API será mantido em um repositório separado.
 
-- Frontend: Angular
-- Backend: ASP.NET Core
-- Banco de dados: PostgreSQL
-- Exportação de relatórios: Excel
+## Stack do frontend
 
-## Módulos do MVP
+- Angular
+- TypeScript
+- HTML/CSS
+- Consumo de API REST
+- Exportação de relatórios em Excel via backend/API
+
+## Módulos previstos no frontend
 
 - Login
 - Dashboard
@@ -22,15 +25,32 @@ O sistema tem como objetivo substituir o controle manual feito em planilhas, per
 - Cadastro de tipos de evento
 - Cadastro de eventos
 - Gestão de escala do evento
-- Exportação de escala em Excel
+- Emissão de escala em Excel
 - Pagamentos pendentes
 - Confirmação de pagamento
 - Relatórios de escala
 
-## Estrutura do Projeto
+## Estrutura esperada
+
+Quando o projeto Angular for criado, a estrutura principal deverá ficar na raiz do repositório:
 
 ```text
-backend/    API e regras de negócio
-frontend/   Interface web
-database/   Scripts, migrations e seeds
-docs/       Documentação funcional, técnica e modelagem
+src/              Código-fonte Angular
+public/           Arquivos públicos e assets estáticos
+docs/             Documentação funcional e modelagem do frontend
+angular.json      Configuração Angular
+package.json      Dependências e scripts do frontend
+tsconfig.json     Configuração TypeScript
+```
+
+## Documentação
+
+- `docs/funcional/visao-geral.md`
+- `docs/funcional/regras-de-negocio.md`
+- `docs/modelagem/fluxos.md`
+- `docs/modelagem/modelo-entidade-relacionamento.md`
+- `docs/arquitetura/arquitetura-frontend.md`
+
+## Status
+
+Projeto em fase inicial de documentação e estruturação do frontend.

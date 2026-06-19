@@ -93,11 +93,11 @@
                   <small>{{ funcionario.chavePix || 'Sem chave Pix' }}</small>
                 </td>
                 <td>
-                  <span>RG {{ funcionario.rg }}</span>
+                  <span>RG {{ formatarRg(funcionario.rg) }}</span>
                   <small>CPF {{ formatarCpf(funcionario.cpf) }}</small>
                 </td>
                 <td>
-                  <span>{{ funcionario.telefone || 'Sem telefone' }}</span>
+                  <span>{{ funcionario.telefone ? formatarTelefone(funcionario.telefone) : 'Sem telefone' }}</span>
                   <small>{{ funcionario.email || 'Sem e-mail' }}</small>
                 </td>
                 <td>{{ funcionario.funcao }}</td>
@@ -151,7 +151,7 @@
         <div class="tag-modal-body form-grid">
           <div class="tag-field span-2">
             <label for="nomeCompleto">Nome completo *</label>
-            <input id="nomeCompleto" type="text" formControlName="nomeCompleto" />
+            <input id="nomeCompleto" type="text" formControlName="nomeCompleto" autocomplete="name" />
             @if (campoInvalido('nomeCompleto')) {
               <small class="field-error">Informe o nome completo.</small>
             }
@@ -159,7 +159,15 @@
 
           <div class="tag-field">
             <label for="rg">RG *</label>
-            <input id="rg" type="text" formControlName="rg" />
+            <input
+              id="rg"
+              type="text"
+              formControlName="rg"
+              placeholder="00.000.000-0"
+              maxlength="12"
+              autocomplete="off"
+              (input)="aplicarMascaraRg($event)"
+            />
             @if (campoInvalido('rg')) {
               <small class="field-error">Informe o RG.</small>
             }
@@ -167,7 +175,16 @@
 
           <div class="tag-field">
             <label for="cpf">CPF *</label>
-            <input id="cpf" type="text" formControlName="cpf" placeholder="000.000.000-00" />
+            <input
+              id="cpf"
+              type="text"
+              formControlName="cpf"
+              placeholder="000.000.000-00"
+              maxlength="14"
+              inputmode="numeric"
+              autocomplete="off"
+              (input)="aplicarMascaraCpf($event)"
+            />
             @if (campoInvalido('cpf')) {
               <small class="field-error">Informe um CPF válido.</small>
             }
@@ -183,12 +200,21 @@
 
           <div class="tag-field">
             <label for="telefone">Telefone</label>
-            <input id="telefone" type="text" formControlName="telefone" />
+            <input
+              id="telefone"
+              type="text"
+              formControlName="telefone"
+              placeholder="(11) 99999-9999"
+              maxlength="15"
+              inputmode="numeric"
+              autocomplete="tel"
+              (input)="aplicarMascaraTelefone($event)"
+            />
           </div>
 
           <div class="tag-field">
             <label for="email">E-mail</label>
-            <input id="email" type="email" formControlName="email" />
+            <input id="email" type="email" formControlName="email" autocomplete="email" />
             @if (campoInvalido('email')) {
               <small class="field-error">Informe um e-mail válido.</small>
             }

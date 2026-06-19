@@ -1,24 +1,102 @@
-<div class="shell">
-  <aside class="sidebar">
-    <div class="brand">
-      <span class="brand-mark">TAG</span>
-      <div>
-        <strong>Gestão</strong>
-        <small>Segurança</small>
+<div class="shell" [class.sidebar-compacta]="sidebarCompacta">
+  <aside class="sidebar" aria-label="Menu lateral administrativo">
+    <div class="sidebar-top">
+      <div class="brand">
+        <span class="brand-mark">TAG</span>
+        @if (!sidebarCompacta) {
+          <div class="brand-copy">
+            <strong>Gestão</strong>
+            <small>Segurança</small>
+          </div>
+        }
       </div>
+
+      <button
+        type="button"
+        class="sidebar-toggle"
+        aria-label="Alternar menu lateral"
+        [attr.aria-expanded]="!sidebarCompacta"
+        (click)="alternarMenu()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
 
     <nav class="menu" aria-label="Menu principal">
-      @for (item of menu; track item.route) {
+      <a
+        class="menu-link"
+        [routerLink]="dashboardItem.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [attr.title]="sidebarCompacta ? dashboardItem.label : null"
+      >
+        <span class="menu-icon">{{ dashboardItem.icon }}</span>
+        @if (!sidebarCompacta) {
+          <span>{{ dashboardItem.label }}</span>
+        }
+      </a>
+
+      <div class="menu-group" routerLinkActive="group-active" [class.open]="cadastrosAberto && !sidebarCompacta">
+        <button
+          type="button"
+          class="menu-parent"
+          [attr.aria-expanded]="cadastrosAberto && !sidebarCompacta"
+          [attr.title]="sidebarCompacta ? 'Cadastros' : null"
+          (click)="alternarCadastros()"
+        >
+          <span class="menu-icon">+</span>
+          @if (!sidebarCompacta) {
+            <span>Cadastros</span>
+            <span class="menu-chevron">›</span>
+          }
+        </button>
+
+        @if (!sidebarCompacta) {
+          <div class="submenu">
+            @for (item of cadastrosMenu; track item.route) {
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <span class="submenu-dot"></span>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="menu-section" [class.hidden-label]="sidebarCompacta">
+        @if (!sidebarCompacta) {
+          <span>Operação</span>
+        }
+      </div>
+
+      @for (item of operacaoMenu; track item.route) {
         <a
+          class="menu-link"
           [routerLink]="item.route"
           routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [attr.title]="sidebarCompacta ? item.label : null"
         >
-          {{ item.label }}
+          <span class="menu-icon">{{ item.icon }}</span>
+          @if (!sidebarCompacta) {
+            <span>{{ item.label }}</span>
+          }
         </a>
       }
     </nav>
+
+    @if (!sidebarCompacta) {
+      <div class="sidebar-footer">
+        <span>Ambiente local</span>
+        <strong>TAG Admin</strong>
+      </div>
+    }
   </aside>
 
   <section class="content-area">
@@ -38,7 +116,9 @@
     </header>
 
     <main class="page-content">
-      <router-outlet />
+      <div class="route-frame">
+        <router-outlet />
+      </div>
     </main>
   </section>
 </div>

@@ -30,6 +30,7 @@ export class ShellComponent {
 
   readonly cadastrosMenu: MenuItem[] = [
     { label: 'Funcionários', route: '/funcionarios', icon: 'funcionarios' },
+    { label: 'Funções', route: '/funcoes-funcionario', icon: 'tipos-evento' },
     { label: 'Casas', route: '/casas', icon: 'casas' },
     { label: 'Tipos de evento', route: '/tipos-evento', icon: 'tipos-evento' },
     { label: 'Usuários', route: '/usuarios', icon: 'usuarios' }

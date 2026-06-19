@@ -3,6 +3,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '../auth/auth.service';
 
+type MenuItem = {
+  label: string;
+  route: string;
+  icon: string;
+};
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -15,15 +21,36 @@ export class ShellComponent {
 
   readonly usuario = this.authService.usuarioAtual;
 
-  readonly menu = [
-    { label: 'Dashboard', route: '/dashboard' },
-    { label: 'Funcionários', route: '/funcionarios' },
-    { label: 'Casas', route: '/casas' },
-    { label: 'Tipos de evento', route: '/tipos-evento' },
-    { label: 'Eventos', route: '/eventos' },
-    { label: 'Pagamentos', route: '/pagamentos' },
-    { label: 'Relatórios', route: '/relatorios' }
+  sidebarCompacta = false;
+  cadastrosAberto = true;
+
+  readonly dashboardItem: MenuItem = { label: 'Dashboard', route: '/dashboard', icon: 'D' };
+
+  readonly cadastrosMenu: MenuItem[] = [
+    { label: 'Funcionários', route: '/funcionarios', icon: 'F' },
+    { label: 'Casas', route: '/casas', icon: 'C' },
+    { label: 'Tipos', route: '/tipos-evento', icon: 'T' }
   ];
+
+  readonly operacaoMenu: MenuItem[] = [
+    { label: 'Eventos', route: '/eventos', icon: 'E' },
+    { label: 'Pagamentos', route: '/pagamentos', icon: 'P' },
+    { label: 'Relatórios', route: '/relatorios', icon: 'R' }
+  ];
+
+  alternarMenu(): void {
+    this.sidebarCompacta = !this.sidebarCompacta;
+  }
+
+  alternarCadastros(): void {
+    if (this.sidebarCompacta) {
+      this.sidebarCompacta = false;
+      this.cadastrosAberto = true;
+      return;
+    }
+
+    this.cadastrosAberto = !this.cadastrosAberto;
+  }
 
   sair(): void {
     this.authService.logout();

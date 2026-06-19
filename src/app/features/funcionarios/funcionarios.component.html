@@ -135,8 +135,8 @@
 </section>
 
 @if (modalAberto) {
-  <div class="tag-modal-backdrop" role="presentation" (click)="fecharModal()">
-    <section class="tag-modal funcionario-modal" role="dialog" aria-modal="true" aria-labelledby="funcionario-modal-title" (click)="$event.stopPropagation()">
+  <div class="tag-modal-backdrop" role="presentation">
+    <section class="tag-modal funcionario-modal" role="dialog" aria-modal="true" aria-labelledby="funcionario-modal-title">
       <header class="tag-modal-header">
         <div>
           <span class="card-kicker">{{ modoFormulario === 'criar' ? 'Novo cadastro' : 'Editar cadastro' }}</span>

@@ -1,15 +1,15 @@
 <div class="shell" [class.sidebar-compacta]="sidebarCompacta">
   <aside class="sidebar" aria-label="Menu lateral administrativo">
     <div class="sidebar-top">
-      <div class="brand">
-        <span class="brand-mark">TAG</span>
-        @if (!sidebarCompacta) {
+      @if (!sidebarCompacta) {
+        <div class="brand">
+          <span class="brand-mark">TAG</span>
           <div class="brand-copy">
             <strong>Gestão</strong>
             <small>Segurança</small>
           </div>
-        }
-      </div>
+        </div>
+      }
 
       <button
         type="button"

@@ -8,6 +8,7 @@ import { Funcionario, FiltroAtivoFuncionario, FuncionarioRequest } from './funci
 import { FuncionariosService } from './funcionarios.service';
 
 type ModoFormulario = 'criar' | 'editar';
+type CampoFormulario = 'nomeCompleto' | 'rg' | 'cpf' | 'chavePix' | 'telefone' | 'email' | 'funcao';
 
 @Component({
   selector: 'app-funcionarios',
@@ -227,7 +228,7 @@ export class FuncionariosComponent implements OnInit {
     });
   }
 
-  campoInvalido(campo: keyof typeof this.form.controls): boolean {
+  campoInvalido(campo: CampoFormulario): boolean {
     const controle = this.form.controls[campo];
     return controle.invalid && (controle.dirty || controle.touched);
   }

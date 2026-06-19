@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -13,19 +13,17 @@ import { AuthService } from '../../../core/auth/auth.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   enviando = false;
   erro = '';
 
   readonly form = this.formBuilder.nonNullable.group({
     email: ['admin@tag.com', [Validators.required, Validators.email]],
-    senha: ['Admin@123456', [Validators.required]]
+    senha: ['', [Validators.required]]
   });
-
-  constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly authService: AuthService,
-    private readonly router: Router
-  ) {}
 
   entrar(): void {
     this.erro = '';

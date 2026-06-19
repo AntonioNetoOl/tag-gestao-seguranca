@@ -1,0 +1,151 @@
+.shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--tag-primary);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px;
+}
+
+.brand {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  margin-bottom: 34px;
+}
+
+.brand-mark {
+  align-items: center;
+  background: #ffffff;
+  border-radius: 14px;
+  color: var(--tag-primary);
+  display: inline-flex;
+  font-weight: 900;
+  height: 48px;
+  justify-content: center;
+  letter-spacing: -0.04em;
+  width: 58px;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand small {
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
+
+.menu {
+  display: grid;
+  gap: 8px;
+}
+
+.menu a {
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 700;
+  padding: 12px 14px;
+}
+
+.menu a:hover,
+.menu a.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.content-area {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+.topbar {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid var(--tag-border);
+  display: flex;
+  justify-content: space-between;
+  min-height: 84px;
+  padding: 18px 32px;
+}
+
+.eyebrow {
+  color: var(--tag-muted);
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.topbar h1 {
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.user-area {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+}
+
+.user-data {
+  display: grid;
+  text-align: right;
+}
+
+.user-data span {
+  color: var(--tag-muted);
+  font-size: 0.84rem;
+}
+
+.logout {
+  background: #f8fafc;
+  border: 1px solid var(--tag-border);
+  border-radius: 10px;
+  color: var(--tag-primary);
+  font-weight: 800;
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.page-content {
+  padding: 30px 32px 42px;
+}
+
+@media (max-width: 860px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    padding: 20px;
+  }
+
+  .menu {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+
+  .topbar,
+  .user-area {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .user-data {
+    text-align: left;
+  }
+
+  .page-content {
+    padding: 22px;
+  }
+}

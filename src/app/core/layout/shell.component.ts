@@ -29,7 +29,7 @@ export class ShellComponent {
   readonly cadastrosMenu: MenuItem[] = [
     { label: 'Funcionários', route: '/funcionarios', icon: 'F' },
     { label: 'Casas', route: '/casas', icon: 'C' },
-    { label: 'Tipos', route: '/tipos-evento', icon: 'T' }
+    { label: 'Tipos de evento', route: '/tipos-evento', icon: 'T' }
   ];
 
   readonly operacaoMenu: MenuItem[] = [

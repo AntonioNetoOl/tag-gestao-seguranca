@@ -1,1 +1,1 @@
-export { FuncionariosComponent } from './funcionarios.component';
+export { FuncionariosPageComponent as FuncionariosComponent } from './funcionarios-page.component';

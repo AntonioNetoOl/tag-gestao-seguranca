@@ -160,10 +160,9 @@
   border-radius: 10px;
   display: inline-flex;
   flex: 0 0 auto;
-  font-size: 0.78rem;
-  height: 28px;
+  height: 30px;
   justify-content: center;
-  width: 28px;
+  width: 30px;
 }
 
 .menu-chevron {
@@ -187,7 +186,7 @@
 }
 
 .menu-group.open .submenu {
-  max-height: 180px;
+  max-height: 240px;
   opacity: 1;
 }
 
@@ -198,16 +197,19 @@
   padding: 9px 12px;
 }
 
-.submenu-dot {
-  background: rgba(255, 255, 255, 0.44);
-  border-radius: 999px;
+.submenu-icon {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
   display: inline-flex;
-  height: 7px;
-  width: 7px;
+  flex: 0 0 auto;
+  height: 22px;
+  justify-content: center;
+  width: 22px;
 }
 
-.submenu a.active .submenu-dot {
-  background: #ffffff;
+.submenu a.active .submenu-icon,
+.submenu a:hover .submenu-icon {
+  color: #ffffff;
 }
 
 .menu-section {

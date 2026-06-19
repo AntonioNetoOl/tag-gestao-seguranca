@@ -26,6 +26,15 @@ export const routes: Routes = [
         loadComponent: () => import('./features/funcionarios').then((m) => m.FuncionariosComponent)
       },
       {
+        path: 'funcoes-funcionario',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Cadastros',
+          title: 'Funções',
+          description: 'Cadastro das funções usadas no cadastro de funcionários.'
+        }
+      },
+      {
         path: 'casas',
         loadComponent: carregarPlaceholder,
         data: {

@@ -32,7 +32,7 @@
         [routerLinkActiveOptions]="{ exact: true }"
         [attr.title]="sidebarCompacta ? dashboardItem.label : null"
       >
-        <span class="menu-icon">{{ dashboardItem.icon }}</span>
+        <span class="menu-icon"><app-menu-icon [name]="dashboardItem.icon"></app-menu-icon></span>
         @if (!sidebarCompacta) {
           <span>{{ dashboardItem.label }}</span>
         }
@@ -46,7 +46,7 @@
           [attr.title]="sidebarCompacta ? 'Cadastros' : null"
           (click)="alternarCadastros()"
         >
-          <span class="menu-icon">+</span>
+          <span class="menu-icon"><app-menu-icon [name]="cadastrosIcon"></app-menu-icon></span>
           @if (!sidebarCompacta) {
             <span>Cadastros</span>
             <span class="menu-chevron">›</span>
@@ -61,7 +61,7 @@
                 routerLinkActive="active"
                 [routerLinkActiveOptions]="{ exact: true }"
               >
-                <span class="submenu-dot"></span>
+                <span class="submenu-icon"><app-menu-icon [name]="item.icon"></app-menu-icon></span>
                 <span>{{ item.label }}</span>
               </a>
             }
@@ -83,7 +83,7 @@
           [routerLinkActiveOptions]="{ exact: true }"
           [attr.title]="sidebarCompacta ? item.label : null"
         >
-          <span class="menu-icon">{{ item.icon }}</span>
+          <span class="menu-icon"><app-menu-icon [name]="item.icon"></app-menu-icon></span>
           @if (!sidebarCompacta) {
             <span>{{ item.label }}</span>
           }

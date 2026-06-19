@@ -23,12 +23,7 @@ export const routes: Routes = [
       },
       {
         path: 'funcionarios',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Funcionários',
-          description: 'Cadastro e manutenção da equipe operacional.'
-        }
+        loadComponent: () => import('./features/funcionarios').then((m) => m.FuncionariosComponent)
       },
       {
         path: 'casas',

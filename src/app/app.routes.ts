@@ -31,6 +31,60 @@ export const routes: Routes = [
         }
       },
       {
+        path: 'casas',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Cadastros',
+          title: 'Casas',
+          description: 'Cadastro das casas e locais de evento.'
+        }
+      },
+      {
+        path: 'tipos-evento',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Cadastros',
+          title: 'Tipos de evento',
+          description: 'Configuração dos tipos de evento.'
+        }
+      },
+      {
+        path: 'usuarios',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Cadastros',
+          title: 'Usuários',
+          description: 'Tela reservada para o cadastro de usuários.'
+        }
+      },
+      {
+        path: 'eventos',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Operação',
+          title: 'Eventos',
+          description: 'Planejamento e acompanhamento dos eventos.'
+        }
+      },
+      {
+        path: 'pagamentos',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Financeiro',
+          title: 'Pagamentos',
+          description: 'Controle de pagamentos.'
+        }
+      },
+      {
+        path: 'relatorios',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Gestão',
+          title: 'Relatórios',
+          description: 'Exportações e consultas consolidadas.'
+        }
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard'

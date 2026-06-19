@@ -6,15 +6,97 @@ Frontend web administrativo do sistema TAG Gestão de Segurança.
 
 Este repositório contém a interface web do sistema TAG, responsável por permitir que a gestão da empresa controle funcionários, casas de evento, tipos de evento, eventos, escalas, pagamentos pendentes e relatórios.
 
-O backend/API será mantido em um repositório separado.
+O backend/API é mantido em um repositório separado:
+
+```text
+AntonioNetoOl/tag-gestao-seguranca-api
+```
 
 ## Stack do frontend
 
-- Angular
+- Angular 20 LTS
 - TypeScript
 - HTML/CSS
 - Consumo de API REST
-- Exportação de relatórios em Excel via backend/API
+- Autenticação JWT
+
+## Status atual
+
+A primeira base funcional do frontend foi implementada na branch:
+
+```text
+feature/frontend-auth-dashboard
+```
+
+Ela contém:
+
+- workspace Angular na raiz;
+- tela pública `/login`;
+- `AuthService` com armazenamento de JWT;
+- interceptor HTTP com `Authorization: Bearer`;
+- guard de autenticação;
+- layout administrativo simples;
+- rota protegida `/dashboard`;
+- dashboard inicial consumindo `GET /api/dashboard`.
+
+## Pré-requisitos
+
+- Node.js compatível com Angular 20.
+- Backend rodando em `http://localhost:5000`.
+- PostgreSQL local ativo.
+- Usuário master configurado no backend.
+
+## Como executar localmente
+
+```powershell
+npm install
+npm start
+```
+
+Depois acesse:
+
+```text
+http://localhost:4200/login
+```
+
+Credenciais locais usadas durante o desenvolvimento:
+
+```json
+{
+  "email": "admin@tag.com",
+  "senha": "Admin@123456"
+}
+```
+
+## URL local da API
+
+```text
+http://localhost:5000/api
+```
+
+Essa URL está configurada em:
+
+```text
+src/environments/environment.ts
+```
+
+## Estrutura principal
+
+```text
+src/
+├── app
+│   ├── core
+│   │   ├── api
+│   │   ├── auth
+│   │   └── layout
+│   └── features
+│       ├── auth
+│       └── dashboard
+├── environments
+├── index.html
+├── main.ts
+└── styles.css
+```
 
 ## Módulos previstos no frontend
 
@@ -25,23 +107,11 @@ O backend/API será mantido em um repositório separado.
 - Cadastro de tipos de evento
 - Cadastro de eventos
 - Gestão de escala do evento
-- Emissão de escala em Excel
+- Emissão de escala em Excel/PDF
 - Pagamentos pendentes
 - Confirmação de pagamento
-- Relatórios de escala
-
-## Estrutura esperada
-
-Quando o projeto Angular for criado, a estrutura principal deverá ficar na raiz do repositório:
-
-```text
-src/              Código-fonte Angular
-public/           Arquivos públicos e assets estáticos
-docs/             Documentação funcional e modelagem do frontend
-angular.json      Configuração Angular
-package.json      Dependências e scripts do frontend
-tsconfig.json     Configuração TypeScript
-```
+- Histórico de pagamentos
+- Relatórios
 
 ## Documentação
 
@@ -50,7 +120,4 @@ tsconfig.json     Configuração TypeScript
 - `docs/modelagem/fluxos.md`
 - `docs/modelagem/modelo-entidade-relacionamento.md`
 - `docs/arquitetura/arquitetura-frontend.md`
-
-## Status
-
-Projeto em fase inicial de documentação e estruturação do frontend.
+- `docs/desenvolvimento/frontend-auth-dashboard.md`

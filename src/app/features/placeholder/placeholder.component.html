@@ -1,0 +1,33 @@
+<section class="placeholder-page">
+  <div class="placeholder-hero tag-card">
+    <div>
+      <span class="eyebrow">{{ eyebrow }}</span>
+      <h2>{{ title }}</h2>
+      <p>{{ description }}</p>
+    </div>
+
+    <span class="status-pill">Em construção</span>
+  </div>
+
+  <div class="placeholder-grid">
+    <article class="tag-card info-card">
+      <span class="card-kicker">Próximo passo</span>
+      <h3>Implementar fluxo operacional</h3>
+      <p>
+        Esta rota já está protegida, estilizada e pronta para receber os componentes de consulta,
+        criação e edição conforme a modelagem do sistema.
+      </p>
+      <a routerLink="/dashboard" class="tag-button tag-button-primary">Voltar ao dashboard</a>
+    </article>
+
+    <article class="tag-card checklist-card">
+      <span class="card-kicker">Base visual</span>
+      <h3>Preparado para CRUD</h3>
+      <ul>
+        @for (ponto of pontos; track ponto) {
+          <li>{{ ponto }}</li>
+        }
+      </ul>
+    </article>
+  </div>
+</section>

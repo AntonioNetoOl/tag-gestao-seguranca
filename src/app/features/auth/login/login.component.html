@@ -1,0 +1,39 @@
+<main class="login-page">
+  <section class="login-card tag-card" aria-labelledby="login-title">
+    <div class="login-header">
+      <span class="logo">TAG</span>
+      <div>
+        <p>Sistema administrativo</p>
+        <h1 id="login-title">Gestão de Segurança</h1>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="entrar()" novalidate>
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" formControlName="email" autocomplete="username" />
+        @if (campoInvalido('email')) {
+          <small>Informe um e-mail válido.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="senha">Senha</label>
+        <input id="senha" type="password" formControlName="senha" autocomplete="current-password" />
+        @if (campoInvalido('senha')) {
+          <small>Informe a senha.</small>
+        }
+      </div>
+
+      @if (erro) {
+        <div class="tag-alert tag-alert-error" role="alert">{{ erro }}</div>
+      }
+
+      <button class="tag-button tag-button-primary" type="submit" [disabled]="enviando">
+        {{ enviando ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="hint">Use o usuário master configurado no backend local.</p>
+  </section>
+</main>

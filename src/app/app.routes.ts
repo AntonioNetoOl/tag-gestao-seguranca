@@ -27,7 +27,7 @@ export const routes: Routes = [
         data: {
           eyebrow: 'Cadastros',
           title: 'Funcionários',
-          description: 'Cadastro e manutenção da equipe operacional, com dados pessoais, status e informações necessárias para escalação.'
+          description: 'Cadastro e manutenção da equipe operacional.'
         }
       },
       {
@@ -36,7 +36,7 @@ export const routes: Routes = [
         data: {
           eyebrow: 'Cadastros',
           title: 'Casas',
-          description: 'Cadastro das casas e locais de evento usados no planejamento das operações de segurança.'
+          description: 'Cadastro das casas e locais de evento.'
         }
       },
       {
@@ -45,7 +45,16 @@ export const routes: Routes = [
         data: {
           eyebrow: 'Cadastros',
           title: 'Tipos de evento',
-          description: 'Configuração dos tipos de evento para padronizar agenda, escala, pagamentos e relatórios.'
+          description: 'Configuração dos tipos de evento.'
+        }
+      },
+      {
+        path: 'usuarios',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Cadastros',
+          title: 'Usuários',
+          description: 'Tela reservada para o cadastro de usuários.'
         }
       },
       {
@@ -54,7 +63,7 @@ export const routes: Routes = [
         data: {
           eyebrow: 'Operação',
           title: 'Eventos',
-          description: 'Planejamento e acompanhamento dos eventos, incluindo datas, horários, status e equipe vinculada.'
+          description: 'Planejamento e acompanhamento dos eventos.'
         }
       },
       {
@@ -63,7 +72,7 @@ export const routes: Routes = [
         data: {
           eyebrow: 'Financeiro',
           title: 'Pagamentos',
-          description: 'Controle de pagamentos pendentes e realizados para funcionários escalados nos eventos.'
+          description: 'Controle de pagamentos.'
         }
       },
       {
@@ -72,7 +81,7 @@ export const routes: Routes = [
         data: {
           eyebrow: 'Gestão',
           title: 'Relatórios',
-          description: 'Exportações e consultas consolidadas para operação, financeiro e acompanhamento gerencial.'
+          description: 'Exportações e consultas consolidadas.'
         }
       },
       {

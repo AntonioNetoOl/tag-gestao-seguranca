@@ -28,6 +28,16 @@ erDiagram
         datetime data_alteracao
     }
 
+    FUNCAO_FUNCIONARIO {
+        uuid id
+        string nome
+        boolean ativo
+        uuid usuario_criacao_id
+        datetime data_criacao
+        uuid usuario_alteracao_id
+        datetime data_alteracao
+    }
+
     CASA {
         uuid id
         string nome
@@ -109,3 +119,9 @@ erDiagram
     PAGAMENTO ||--o{ PAGAMENTO_ITEM : possui
     EVENTO_FUNCIONARIO ||--o| PAGAMENTO_ITEM : pago_em
 ```
+
+## Observação sobre funções de funcionário
+
+A entidade `FUNCAO_FUNCIONARIO` é um cadastro mestre usado para alimentar o campo `funcao` do cadastro de funcionários no frontend.
+
+No momento, `FUNCIONARIO.funcao` permanece como texto para preservar compatibilidade com os dados já existentes. A tela de funcionários deve selecionar o texto a partir das opções retornadas por `GET /api/funcoes-funcionario/opcoes`.

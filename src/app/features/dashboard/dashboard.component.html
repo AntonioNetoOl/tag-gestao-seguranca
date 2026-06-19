@@ -64,7 +64,7 @@
                   <td>{{ evento.casaNome }}</td>
                   <td>{{ evento.tipoEventoNome }}</td>
                   <td>
-                    <span class="tag-badge" [class]="classeStatus(evento)">{{ evento.status }}</span>
+                    <span class="tag-badge {{ classeStatus(evento) }}">{{ evento.status }}</span>
                   </td>
                   <td>{{ evento.quantidadeFuncionarios }}</td>
                 </tr>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '../auth/auth.service';
@@ -11,6 +11,8 @@ import { AuthService } from '../auth/auth.service';
   styleUrl: './shell.component.css'
 })
 export class ShellComponent {
+  private readonly authService = inject(AuthService);
+
   readonly usuario = this.authService.usuarioAtual;
 
   readonly menu = [
@@ -22,8 +24,6 @@ export class ShellComponent {
     { label: 'Pagamentos', route: '/pagamentos' },
     { label: 'Relatórios', route: '/relatorios' }
   ];
-
-  constructor(private readonly authService: AuthService) {}
 
   sair(): void {
     this.authService.logout();

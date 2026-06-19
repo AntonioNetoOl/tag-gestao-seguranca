@@ -1,13 +1,37 @@
 <section class="funcionarios-page">
   <div class="page-header tag-card">
-    <div>
-      <span class="eyebrow">Cadastros</span>
-      <h2>Funcionários</h2>
-      <p>Gerencie a equipe operacional usada nas escalas dos eventos.</p>
-    </div>
+    <div><span class="eyebrow">Cadastros</span><h2>Funcionários</h2><p>Gerencie a equipe operacional usada nas escalas dos eventos.</p></div>
+    <button type="button" class="tag-button tag-button-primary" (click)="abrirNovo()">Novo funcionário</button>
+  </div>
 
-    <button type="button" class="tag-button tag-button-primary" (click)="abrirNovo()">
-      Novo funcionário
-    </button>
+  @if (erro) { <div class="tag-alert tag-alert-error">{{ erro }}</div> }
+  @if (sucesso) { <div class="tag-alert tag-alert-success">{{ sucesso }}</div> }
+
+  <div class="filters tag-card">
+    <div class="tag-field"><label>Busca</label><input type="search" placeholder="Nome, RG ou CPF" [value]="busca" (input)="alterarBusca($event)" (keyup.enter)="pesquisar()" /></div>
+    <div class="tag-field"><label>Status</label><select [value]="filtroAtivo" (change)="alterarFiltroAtivo($event)"><option value="todos">Todos</option><option value="ativos">Ativos</option><option value="inativos">Inativos</option></select></div>
+    <div class="filter-actions"><button class="tag-button tag-button-secondary" type="button" (click)="limparFiltros()">Limpar</button><button class="tag-button tag-button-primary" type="button" (click)="pesquisar()">Pesquisar</button></div>
+  </div>
+
+  <div class="table-card tag-card">
+    <div class="table-toolbar"><div><span class="card-kicker">Listagem</span><strong>{{ resultado.totalItems }} funcionário(s)</strong></div></div>
+    @if (carregando) { <div class="state-box">Carregando funcionários...</div> }
+    @else if (resultado.items.length === 0) { <div class="state-box empty"><strong>Nenhum funcionário encontrado.</strong><span>Altere os filtros ou cadastre um novo funcionário.</span></div> }
+    @else {
+      <div class="table-scroll"><table><thead><tr><th>Nome</th><th>Documentos</th><th>Contato</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+        @for (funcionario of resultado.items; track funcionario.id) {
+          <tr><td><strong>{{ funcionario.nomeCompleto }}</strong><small>{{ funcionario.funcao }}</small></td><td><span>RG {{ formatarRg(funcionario.rg) }}</span><small>CPF {{ formatarCpf(funcionario.cpf) }}</small></td><td><span>{{ funcionario.telefone ? formatarTelefone(funcionario.telefone) : 'Sem telefone' }}</span><small>{{ funcionario.email || 'Sem e-mail' }}</small></td><td><span class="tag-badge" [class.tag-badge-success]="funcionario.ativo" [class.tag-badge-neutral]="!funcionario.ativo">{{ funcionario.ativo ? 'Ativo' : 'Inativo' }}</span></td><td><div class="row-actions"><button class="icon-button" type="button" (click)="abrirEdicao(funcionario)">Editar</button>@if (funcionario.ativo) { <button class="icon-button danger" type="button" (click)="inativar(funcionario)">Inativar</button> } @else { <button class="icon-button success" type="button" (click)="ativar(funcionario)">Reativar</button> }</div></td></tr>
+        }
+      </tbody></table></div>
+      <div class="pagination"><span>Página {{ resultado.page }} de {{ resultado.totalPages || 1 }}</span><div><button class="tag-button tag-button-secondary" type="button" [disabled]="page <= 1" (click)="paginaAnterior()">Anterior</button><button class="tag-button tag-button-secondary" type="button" [disabled]="page >= resultado.totalPages" (click)="proximaPagina()">Próxima</button></div></div>
+    }
   </div>
 </section>
+
+@if (modalAberto) {
+  <div class="tag-modal-backdrop"><section class="tag-modal funcionario-modal"><header class="tag-modal-header"><div><span class="card-kicker">{{ modoFormulario === 'criar' ? 'Novo cadastro' : 'Editar cadastro' }}</span><h2>{{ modoFormulario === 'criar' ? 'Cadastrar funcionário' : 'Editar funcionário' }}</h2></div><button type="button" class="modal-close" (click)="fecharModal()">×</button></header><form [formGroup]="form" (ngSubmit)="salvar()"><div class="tag-modal-body form-grid"><div class="tag-field span-2"><label>Nome completo *</label><input formControlName="nomeCompleto" />@if (campoInvalido('nomeCompleto')) { <small class="field-error">Informe o nome completo.</small> }</div><div class="tag-field"><label>RG *</label><input formControlName="rg" placeholder="00.000.000-0" maxlength="12" (input)="aplicarMascaraRg($event)" /></div><div class="tag-field"><label>CPF *</label><input formControlName="cpf" placeholder="000.000.000-00" maxlength="14" (input)="aplicarMascaraCpf($event)" />@if (campoInvalido('cpf')) { <small class="field-error">Informe um CPF válido.</small> }</div><div class="tag-field"><label>Função *</label><input formControlName="funcao" placeholder="Segurança, Líder..." /></div><div class="tag-field"><label>Telefone</label><input formControlName="telefone" placeholder="(11) 99999-9999" maxlength="15" (input)="aplicarMascaraTelefone($event)" /></div><div class="tag-field"><label>E-mail</label><input formControlName="email" type="email" />@if (campoInvalido('email')) { <small class="field-error">Informe um e-mail válido.</small> }</div><div class="tag-field span-2"><label>Chave Pix</label><input formControlName="chavePix" /></div></div><footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharModal()">Cancelar</button><button type="submit" class="tag-button tag-button-primary" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar funcionário' }}</button></footer></form></section></div>
+}
+
+@if (aviso) {
+  <div class="aviso-backdrop"><section class="aviso-card" [class.aviso-error]="aviso.tipo === 'erro'"><div class="aviso-icon"><span>!</span></div><div class="aviso-content"><span class="card-kicker">{{ aviso.tipo === 'erro' ? 'Atenção necessária' : 'Confirmação' }}</span><h2>{{ aviso.titulo }}</h2><p>{{ aviso.mensagem }}</p>@if (aviso.detalhe) { <small>{{ aviso.detalhe }}</small> }</div><footer class="aviso-actions">@if (aviso.textoSecundario) { <button type="button" class="tag-button tag-button-secondary" (click)="fecharAviso()">{{ aviso.textoSecundario }}</button> }<button type="button" class="tag-button tag-button-primary" (click)="confirmarAviso()">{{ aviso.textoPrincipal }}</button></footer></section></div>
+}

@@ -11,7 +11,7 @@ import { FuncionariosService } from './funcionarios.service';
 
 type ModoFormulario = 'criar' | 'editar';
 type CampoFormulario = 'nomeCompleto' | 'rg' | 'cpf' | 'chavePix' | 'telefone' | 'email' | 'funcaoFuncionarioId';
-type AvisoTipo = 'pergunta' | 'erro';
+type AvisoTipo = 'pergunta' | 'erro' | 'sucesso';
 
 interface AvisoState {
   tipo: AvisoTipo;
@@ -100,14 +100,7 @@ export class FuncionariosPageComponent implements OnInit {
   paginaAnterior(): void { if (this.page <= 1) return; this.page--; this.carregarFuncionarios(); }
   proximaPagina(): void { if (this.page >= this.resultado.totalPages) return; this.page++; this.carregarFuncionarios(); }
 
-  abrirNovo(): void {
-    this.modoFormulario = 'criar';
-    this.funcionarioSelecionado = null;
-    this.sucesso = '';
-    this.erro = '';
-    this.form.reset();
-    this.modalAberto = true;
-  }
+  abrirNovo(): void { this.modoFormulario = 'criar'; this.funcionarioSelecionado = null; this.sucesso = ''; this.erro = ''; this.form.reset(); this.modalAberto = true; }
 
   abrirEdicao(funcionario: Funcionario): void {
     this.modoFormulario = 'editar';
@@ -135,7 +128,12 @@ export class FuncionariosPageComponent implements OnInit {
     const nome = this.funcaoForm.getRawValue().nome.trim();
     this.salvandoFuncao = true;
     this.funcoesFuncionarioService.criar({ nome }).subscribe({
-      next: (funcao) => { this.salvandoFuncao = false; this.modalFuncaoAberto = false; this.carregarFuncoesFuncionario(funcao.id); },
+      next: (funcao) => {
+        this.salvandoFuncao = false;
+        this.modalFuncaoAberto = false;
+        this.carregarFuncoesFuncionario(funcao.id);
+        this.abrirSucesso('Função cadastrada', 'Registro gravado com sucesso.');
+      },
       error: (error: unknown) => { this.salvandoFuncao = false; this.abrirErro('Não foi possível cadastrar a função', obterMensagemErroApi(error)); }
     });
   }
@@ -146,10 +144,17 @@ export class FuncionariosPageComponent implements OnInit {
     this.erro = ''; this.sucesso = '';
     if (this.form.invalid) { this.form.markAllAsTouched(); this.abrirErro('Revise o cadastro', 'Existem campos obrigatórios ou inválidos no formulário.', 'Confira nome completo, RG, CPF, função e e-mail antes de salvar.'); return; }
     const request = this.montarRequest();
+    const mensagemSucesso = this.modoFormulario === 'criar' ? 'Funcionário cadastrado com sucesso.' : 'Funcionário atualizado com sucesso.';
     this.salvando = true;
     const operacao = this.modoFormulario === 'criar' ? this.funcionariosService.criar(request) : this.funcionariosService.atualizar(this.funcionarioSelecionado?.id ?? '', request);
     operacao.subscribe({
-      next: () => { this.salvando = false; this.modalAberto = false; this.sucesso = this.modoFormulario === 'criar' ? 'Funcionário cadastrado com sucesso.' : 'Funcionário atualizado com sucesso.'; this.carregarFuncionarios(); },
+      next: () => {
+        this.salvando = false;
+        this.modalAberto = false;
+        this.sucesso = mensagemSucesso;
+        this.abrirSucesso('Registro salvo', mensagemSucesso);
+        this.carregarFuncionarios();
+      },
       error: (error: unknown) => { const mensagem = obterMensagemErroApi(error); this.salvando = false; this.erro = mensagem; this.abrirErro('Não foi possível salvar', mensagem); }
     });
   }
@@ -169,9 +174,10 @@ export class FuncionariosPageComponent implements OnInit {
   formatarRg(rg: string): string { const caracteres = this.normalizarRg(rg).slice(0, 9); if (caracteres.length <= 2) return caracteres; if (caracteres.length <= 5) return `${caracteres.slice(0, 2)}.${caracteres.slice(2)}`; if (caracteres.length <= 8) return `${caracteres.slice(0, 2)}.${caracteres.slice(2, 5)}.${caracteres.slice(5)}`; return `${caracteres.slice(0, 2)}.${caracteres.slice(2, 5)}.${caracteres.slice(5, 8)}-${caracteres.slice(8)}`; }
   formatarTelefone(telefone: string): string { const numeros = this.somenteNumeros(telefone).slice(0, 11); if (numeros.length <= 2) return numeros; if (numeros.length <= 6) return `(${numeros.slice(0, 2)}) ${numeros.slice(2)}`; if (numeros.length <= 10) return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`; return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`; }
 
-  private executarInativacao(funcionario: Funcionario): void { this.erro = ''; this.sucesso = ''; this.funcionariosService.inativar(funcionario.id).subscribe({ next: () => { this.sucesso = 'Funcionário inativado com sucesso.'; this.carregarFuncionarios(); }, error: (error: unknown) => { const mensagem = obterMensagemErroApi(error); this.erro = mensagem; this.abrirErro('Não foi possível inativar', mensagem); } }); }
-  private executarReativacao(funcionario: Funcionario): void { this.erro = ''; this.sucesso = ''; this.funcionariosService.ativar(funcionario.id).subscribe({ next: () => { this.sucesso = 'Funcionário reativado com sucesso.'; this.carregarFuncionarios(); }, error: (error: unknown) => { const mensagem = obterMensagemErroApi(error); this.erro = mensagem; this.abrirErro('Não foi possível reativar', mensagem); } }); }
+  private executarInativacao(funcionario: Funcionario): void { this.erro = ''; this.sucesso = ''; this.funcionariosService.inativar(funcionario.id).subscribe({ next: () => { this.sucesso = 'Funcionário inativado com sucesso.'; this.abrirSucesso('Registro atualizado', 'Funcionário inativado com sucesso.'); this.carregarFuncionarios(); }, error: (error: unknown) => { const mensagem = obterMensagemErroApi(error); this.erro = mensagem; this.abrirErro('Não foi possível inativar', mensagem); } }); }
+  private executarReativacao(funcionario: Funcionario): void { this.erro = ''; this.sucesso = ''; this.funcionariosService.ativar(funcionario.id).subscribe({ next: () => { this.sucesso = 'Funcionário reativado com sucesso.'; this.abrirSucesso('Registro atualizado', 'Funcionário reativado com sucesso.'); this.carregarFuncionarios(); }, error: (error: unknown) => { const mensagem = obterMensagemErroApi(error); this.erro = mensagem; this.abrirErro('Não foi possível reativar', mensagem); } }); }
   private abrirErro(titulo: string, mensagem: string, detalhe?: string): void { this.aviso = { tipo: 'erro', titulo, mensagem, detalhe, textoPrincipal: 'Entendi' }; }
+  private abrirSucesso(titulo: string, mensagem = 'Registro gravado com sucesso.'): void { this.aviso = { tipo: 'sucesso', titulo, mensagem, textoPrincipal: 'OK' }; }
 
   private validarCpf(control: AbstractControl): ValidationErrors | null { const cpf = String(control.value ?? '').replace(/\D/g, ''); if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return { cpf: true }; let soma = 0; for (let i = 0; i < 9; i++) soma += Number(cpf[i]) * (10 - i); let digito = (soma * 10) % 11; digito = digito === 10 ? 0 : digito; if (digito !== Number(cpf[9])) return { cpf: true }; soma = 0; for (let i = 0; i < 10; i++) soma += Number(cpf[i]) * (11 - i); digito = (soma * 10) % 11; digito = digito === 10 ? 0 : digito; return digito === Number(cpf[10]) ? null : { cpf: true }; }
   private converterFiltroAtivo(): boolean | undefined { if (this.filtroAtivo === 'ativos') return true; if (this.filtroAtivo === 'inativos') return false; return undefined; }

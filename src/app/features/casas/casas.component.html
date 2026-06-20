@@ -46,7 +46,7 @@
                 <td><strong>{{ casa.nome }}</strong><small>Local de evento</small></td>
                 <td><span>{{ casa.endereco }}</span></td>
                 <td><span>{{ formatarCep(casa.cep) || 'Sem CEP' }}</span></td>
-                <td><div class="row-actions"><button class="icon-button" type="button" (click)="abrirEdicao(casa)">Editar</button><button class="icon-button danger" type="button" (click)="excluir(casa)">Excluir</button></div></td>
+                <td><div class="row-actions"><button class="icon-button action-icon-button" type="button" aria-label="Editar casa" title="Editar casa" (click)="abrirEdicao(casa)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20Z"></path><path d="M13.5 6 18 10.5"></path></svg></button><button class="icon-button action-icon-button danger" type="button" aria-label="Excluir casa" title="Excluir casa" (click)="excluir(casa)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M8 7l1-3h6l1 3"></path><path d="M7 7l1 13h8l1-13"></path></svg></button></div></td>
               </tr>
             }
           </tbody>

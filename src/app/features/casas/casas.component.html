@@ -48,7 +48,7 @@
       </div>
       <div class="pagination">
         <span>Página {{ resultado.page }} de {{ resultado.totalPages || 1 }}</span>
-        <div><label class="page-size compact-page-size"><span>Linhas</span><select [value]="pageSize" (change)="alterarPageSize($event)">@for (option of pageSizeOptions; track option) { <option [value]="option">{{ option }}</option> }</select></label><button class="tag-button tag-button-secondary" type="button" [disabled]="page <= 1" (click)="paginaAnterior()">Anterior</button><button class="tag-button tag-button-secondary" type="button" [disabled]="page >= resultado.totalPages" (click)="proximaPagina()">Próxima</button></div>
+        <div><label class="page-size compact-page-size"><span>Linhas</span><select [value]="pageSize" (change)="alterarPageSize($event)">@for (option of pageSizeOptions; track option) { <option [value]="option" [selected]="pageSize === option">{{ option }}</option> }</select></label><button class="tag-button tag-button-secondary" type="button" [disabled]="page <= 1" (click)="paginaAnterior()">Anterior</button><button class="tag-button tag-button-secondary" type="button" [disabled]="page >= resultado.totalPages" (click)="proximaPagina()">Próxima</button></div>
       </div>
     }
   </div>

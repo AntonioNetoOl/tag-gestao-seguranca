@@ -1,0 +1,83 @@
+<section class="cadastro-page">
+  <div class="page-header tag-card">
+    <div>
+      <span class="eyebrow">Cadastros</span>
+      <h2>Funções</h2>
+      <p>Padronize as funções usadas no cadastro de funcionários.</p>
+    </div>
+    <button type="button" class="tag-button tag-button-primary" (click)="abrirNovo()">Nova função</button>
+  </div>
+
+  @if (erro) { <div class="tag-alert tag-alert-error">{{ erro }}</div> }
+
+  <div class="filters tag-card">
+    <div class="tag-field search-field">
+      <label>Busca</label>
+      <input type="search" placeholder="Nome da função" [value]="busca" (input)="alterarBusca($event)" (keyup.enter)="pesquisar()" />
+    </div>
+    <div class="tag-field">
+      <label>Status</label>
+      <select [value]="filtroAtivo" (change)="alterarFiltroAtivo($event)">
+        <option value="todos">Todos</option>
+        <option value="ativos">Ativos</option>
+        <option value="inativos">Inativos</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button class="tag-button tag-button-secondary" type="button" (click)="limparFiltros()">Limpar</button>
+      <button class="tag-button tag-button-primary" type="button" (click)="pesquisar()">Pesquisar</button>
+    </div>
+  </div>
+
+  <div class="table-card tag-card">
+    <div class="table-toolbar">
+      <div><span class="card-kicker">Listagem</span><strong>{{ resultado.totalItems }} função(ões)</strong></div>
+    </div>
+
+    @if (carregando) {
+      <div class="state-box">Carregando funções...</div>
+    } @else if (resultado.items.length === 0) {
+      <div class="state-box empty"><strong>Nenhuma função encontrada.</strong><span>Altere os filtros ou cadastre uma nova função.</span></div>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Função</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody>
+            @for (funcao of resultado.items; track funcao.id) {
+              <tr>
+                <td><strong>{{ funcao.nome }}</strong><small>Função de funcionário</small></td>
+                <td><span class="tag-badge" [class.tag-badge-success]="funcao.ativo" [class.tag-badge-neutral]="!funcao.ativo">{{ funcao.ativo ? 'Ativa' : 'Inativa' }}</span></td>
+                <td><div class="row-actions"><button class="icon-button action-icon-button" type="button" aria-label="Editar função" title="Editar função" (click)="abrirEdicao(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20Z"></path><path d="M13.5 6 18 10.5"></path></svg></button>@if (funcao.ativo) { <button class="icon-button action-icon-button danger" type="button" aria-label="Inativar função" title="Inativar função" (click)="inativar(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M8.5 12h7"></path></svg></button> } @else { <button class="icon-button action-icon-button success" type="button" aria-label="Reativar função" title="Reativar função" (click)="ativar(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h5a5 5 0 1 1-4.25 7.64"></path><path d="M7 7V3"></path><path d="M7 7H3"></path></svg></button> }</div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span>Página {{ resultado.page }} de {{ resultado.totalPages || 1 }}</span>
+        <div><label class="page-size compact-page-size"><span>Linhas</span><select [value]="pageSize" (change)="alterarPageSize($event)">@for (option of pageSizeOptions; track option) { <option [value]="option" [selected]="pageSize === option">{{ option }}</option> }</select></label><button class="tag-button tag-button-secondary" type="button" [disabled]="page <= 1" (click)="paginaAnterior()">Anterior</button><button class="tag-button tag-button-secondary" type="button" [disabled]="page >= resultado.totalPages" (click)="proximaPagina()">Próxima</button></div>
+      </div>
+    }
+  </div>
+</section>
+
+@if (modalAberto) {
+  <div class="tag-modal-backdrop">
+    <section class="tag-modal funcao-modal">
+      <header class="tag-modal-header">
+        <div><span class="card-kicker">{{ modoFormulario === 'criar' ? 'Novo cadastro' : 'Editar cadastro' }}</span><h2>{{ modoFormulario === 'criar' ? 'Cadastrar função' : 'Editar função' }}</h2></div>
+        <button type="button" class="modal-close" (click)="fecharModal()">×</button>
+      </header>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="tag-modal-body">
+          <div class="tag-field"><label>Nome da função *</label><input formControlName="nome" placeholder="Segurança, Líder, Coordenador..." />@if (campoNomeInvalido()) { <small class="field-error">Informe o nome da função.</small> }</div>
+        </div>
+        <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharModal()" [disabled]="salvando">Cancelar</button><button type="submit" class="tag-button tag-button-primary" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar função' }}</button></footer>
+      </form>
+    </section>
+  </div>
+}
+
+@if (aviso) {
+  <div class="tag-modal-backdrop"><section class="tag-modal feedback-modal" [class.feedback-success]="aviso.tipo === 'sucesso'" [class.feedback-error]="aviso.tipo === 'erro'" [class.feedback-warning]="aviso.tipo === 'pergunta'"><div class="feedback-layout">@if (aviso.tipo === 'sucesso') { <svg class="success-check" viewBox="0 0 96 96" aria-hidden="true"><circle class="success-check-ring" cx="48" cy="48" r="38"></circle><path class="success-check-mark" d="M29 49.5 L42.5 63 L68 35"></path></svg> } @else { <svg class="warning-icon" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24"></circle><circle class="warning-pulse" cx="32" cy="32" r="26"></circle><text x="32" y="41" text-anchor="middle" font-size="30" font-weight="900">!</text></svg> }<div><span class="card-kicker">{{ aviso.tipo === 'sucesso' ? 'Tudo certo' : aviso.tipo === 'erro' ? 'Atenção necessária' : 'Confirmação' }}</span><h2>{{ aviso.titulo }}</h2><p>{{ aviso.mensagem }}</p>@if (aviso.detalhe) { <small>{{ aviso.detalhe }}</small> }</div><footer class="feedback-actions">@if (aviso.textoSecundario) { <button type="button" class="tag-button tag-button-secondary" (click)="fecharAviso()">{{ aviso.textoSecundario }}</button> } @if (aviso.tipo !== 'sucesso') { <button type="button" class="tag-button tag-button-primary" (click)="confirmarAviso()">{{ aviso.textoPrincipal }}</button> }</footer></div></section></div>
+}

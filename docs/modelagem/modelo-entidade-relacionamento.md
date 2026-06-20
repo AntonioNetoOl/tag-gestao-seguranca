@@ -20,6 +20,7 @@ erDiagram
         string chave_pix
         string telefone
         string email
+        uuid funcao_funcionario_id
         string funcao
         boolean ativo
         uuid usuario_criacao_id
@@ -111,6 +112,7 @@ erDiagram
         decimal valor_total_item
     }
 
+    FUNCAO_FUNCIONARIO ||--o{ FUNCIONARIO : define
     CASA ||--o{ EVENTO : possui
     TIPO_EVENTO ||--o{ EVENTO : classifica
     EVENTO ||--o{ EVENTO_FUNCIONARIO : possui
@@ -124,4 +126,4 @@ erDiagram
 
 A entidade `FUNCAO_FUNCIONARIO` é um cadastro mestre usado para alimentar o campo `funcao` do cadastro de funcionários no frontend.
 
-No momento, `FUNCIONARIO.funcao` permanece como texto para preservar compatibilidade com os dados já existentes. A tela de funcionários deve selecionar o texto a partir das opções retornadas por `GET /api/funcoes-funcionario/opcoes`.
+O relacionamento é feito por `FUNCIONARIO.funcao_funcionario_id -> FUNCAO_FUNCIONARIO.id`. O campo textual `FUNCIONARIO.funcao` permanece como valor desnormalizado para compatibilidade visual e relatórios.

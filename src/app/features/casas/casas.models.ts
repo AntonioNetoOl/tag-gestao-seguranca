@@ -13,6 +13,11 @@ export interface CasaRequest {
   cep: string | null;
 }
 
+export interface CasaOpcao {
+  id: string;
+  nome: string;
+}
+
 export interface CasaListagemParams {
   busca?: string;
   page: number;

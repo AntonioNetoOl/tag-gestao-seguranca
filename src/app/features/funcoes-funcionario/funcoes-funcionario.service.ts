@@ -25,9 +25,7 @@ export class FuncoesFuncionarioService {
       httpParams = httpParams.set('busca', params.busca);
     }
 
-    if (params.ativo !== undefined) {
-      httpParams = httpParams.set('ativo', params.ativo);
-    }
+    httpParams = httpParams.set('ativo', params.ativo ?? true);
 
     return this.http.get<PagedResponse<FuncaoFuncionario>>(this.apiUrl, { params: httpParams });
   }

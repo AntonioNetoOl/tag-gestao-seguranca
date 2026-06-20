@@ -18,7 +18,8 @@ export class UsuariosService {
 
     if (params.busca) httpParams = httpParams.set('busca', params.busca);
     if (params.perfil) httpParams = httpParams.set('perfil', params.perfil);
-    if (params.ativo !== undefined) httpParams = httpParams.set('ativo', params.ativo);
+
+    httpParams = httpParams.set('ativo', params.ativo ?? true);
 
     return this.http.get<PagedResponse<Usuario>>(this.apiUrl, { params: httpParams });
   }

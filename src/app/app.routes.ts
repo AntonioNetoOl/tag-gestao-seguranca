@@ -48,12 +48,7 @@ export const routes: Routes = [
       },
       {
         path: 'eventos',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Operação',
-          title: 'Eventos',
-          description: 'Planejamento e acompanhamento dos eventos.'
-        }
+        loadComponent: () => import('./features/eventos').then((m) => m.EventosComponent)
       },
       {
         path: 'pagamentos',

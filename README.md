@@ -46,7 +46,8 @@ Ela contém:
 - dashboard inicial consumindo `GET /api/dashboard`;
 - cadastro de funcionários com listagem, filtros, paginação, modal, máscaras e ações de ativar/inativar;
 - seleção de função no cadastro de funcionário;
-- cadastro rápido de função pelo botão `+` ao lado do campo Função.
+- cadastro rápido de função pelo botão `+` ao lado do campo Função;
+- cadastro de casas com listagem, busca, paginação, modal, máscara de CEP e exclusão protegida por confirmação.
 
 ## Pré-requisitos
 
@@ -101,6 +102,19 @@ POST /api/funcoes-funcionario
 
 A criação rápida pelo botão `+` abre um modal simples, grava a função no backend e recarrega a lista de opções.
 
+## Integração com casas
+
+O cadastro de casas consome:
+
+```text
+GET    /api/casas
+POST   /api/casas
+PUT    /api/casas/{id}
+DELETE /api/casas/{id}
+```
+
+A exclusão é validada no backend e não é permitida quando a casa possui eventos vinculados.
+
 ## Estrutura principal
 
 ```text
@@ -113,6 +127,7 @@ src/
 │   └── features
 │       ├── auth
 │       ├── dashboard
+│       ├── casas
 │       ├── funcionarios
 │       └── funcoes-funcionario
 ├── environments

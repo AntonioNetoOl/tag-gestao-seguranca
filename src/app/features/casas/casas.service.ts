@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { PagedResponse } from '../../core/models/paged-response.model';
-import { Casa, CasaListagemParams, CasaRequest } from './casas.models';
+import { Casa, CasaListagemParams, CasaOpcao, CasaRequest } from './casas.models';
 
 @Injectable({ providedIn: 'root' })
 export class CasasService {
@@ -21,6 +21,10 @@ export class CasasService {
     }
 
     return this.http.get<PagedResponse<Casa>>(this.apiUrl, { params: httpParams });
+  }
+
+  listarOpcoes(): Observable<CasaOpcao[]> {
+    return this.http.get<CasaOpcao[]>(`${this.apiUrl}/opcoes`);
   }
 
   criar(request: CasaRequest): Observable<Casa> {

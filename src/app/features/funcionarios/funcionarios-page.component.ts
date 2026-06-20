@@ -76,7 +76,12 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
     this.carregando = true;
     this.erro = '';
     this.funcionariosService.listar({ busca: this.busca.trim() || undefined, ativo: this.converterFiltroAtivo(), page: this.page, pageSize: this.pageSize }).subscribe({
-      next: (resultado) => { this.resultado = resultado; this.carregando = false; },
+      next: (resultado) => {
+        this.resultado = resultado;
+        this.page = resultado.page;
+        this.pageSize = this.normalizarPageSize(resultado.pageSize || this.pageSize);
+        this.carregando = false;
+      },
       error: (error: unknown) => { this.erro = obterMensagemErroApi(error); this.carregando = false; }
     });
   }
@@ -98,7 +103,7 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
   limparFiltros(): void { this.busca = ''; this.filtroAtivo = 'todos'; this.page = 1; this.carregarFuncionarios(); }
   alterarBusca(event: Event): void { this.busca = (event.target as HTMLInputElement).value; }
   alterarFiltroAtivo(event: Event): void { this.filtroAtivo = (event.target as HTMLSelectElement).value as FiltroAtivoFuncionario; this.pesquisar(); }
-  alterarPageSize(event: Event): void { this.pageSize = Number((event.target as HTMLSelectElement).value); this.page = 1; this.carregarFuncionarios(); }
+  alterarPageSize(event: Event): void { this.pageSize = this.normalizarPageSize(Number((event.target as HTMLSelectElement).value)); this.page = 1; this.carregarFuncionarios(); }
   paginaAnterior(): void { if (this.page <= 1) return; this.page--; this.carregarFuncionarios(); }
   proximaPagina(): void { if (this.page >= this.resultado.totalPages) return; this.page++; this.carregarFuncionarios(); }
 
@@ -187,6 +192,7 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
   private converterFiltroAtivo(): boolean | undefined { if (this.filtroAtivo === 'ativos') return true; if (this.filtroAtivo === 'inativos') return false; return undefined; }
   private montarRequest(): FuncionarioRequest { const raw = this.form.getRawValue(); const funcao = this.localizarFuncao(raw.funcaoFuncionarioId); return { nomeCompleto: raw.nomeCompleto.trim(), rg: this.normalizarRg(raw.rg), cpf: this.somenteNumeros(raw.cpf), chavePix: this.normalizarOpcional(raw.chavePix), telefone: this.normalizarOpcional(this.somenteNumeros(raw.telefone)), email: this.normalizarOpcional(raw.email), funcaoFuncionarioId: raw.funcaoFuncionarioId, funcao: funcao?.nome ?? '' }; }
   private localizarFuncao(valor: string): FuncaoFuncionarioOpcao | undefined { return this.funcoesFuncionario.find((item) => item.id === valor || item.nome === valor); }
+  private normalizarPageSize(valor: number): number { return this.pageSizeOptions.includes(valor) ? valor : 5; }
   private normalizarOpcional(valor: string): string | null { const normalizado = valor.trim(); return normalizado ? normalizado : null; }
   private somenteNumeros(valor: string): string { return valor.replace(/\D/g, ''); }
   private normalizarRg(valor: string): string { return valor.replace(/[^0-9a-zA-Z]/g, '').toUpperCase(); }

@@ -48,13 +48,13 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
   funcoesFuncionario: FuncaoFuncionarioOpcao[] = [];
 
   page = 1;
-  pageSize = 10;
+  pageSize = 5;
   busca = '';
   filtroAtivo: FiltroAtivoFuncionario = 'todos';
 
-  readonly pageSizeOptions = [10, 20, 50];
+  readonly pageSizeOptions = [5, 10, 15, 20];
 
-  resultado: PagedResponse<Funcionario> = { items: [], page: 1, pageSize: 10, totalItems: 0, totalPages: 0 };
+  resultado: PagedResponse<Funcionario> = { items: [], page: 1, pageSize: 5, totalItems: 0, totalPages: 0 };
 
   readonly form = this.formBuilder.nonNullable.group({
     nomeCompleto: ['', [Validators.required, Validators.maxLength(200)]],

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { PagedResponse } from '../../core/models/paged-response.model';
-import { TipoEvento, TipoEventoListagemParams, TipoEventoRequest } from './tipos-evento.models';
+import { TipoEvento, TipoEventoListagemParams, TipoEventoOpcao, TipoEventoRequest } from './tipos-evento.models';
 
 @Injectable({ providedIn: 'root' })
 export class TiposEventoService {
@@ -25,6 +25,10 @@ export class TiposEventoService {
     }
 
     return this.http.get<PagedResponse<TipoEvento>>(this.apiUrl, { params: httpParams });
+  }
+
+  listarOpcoes(): Observable<TipoEventoOpcao[]> {
+    return this.http.get<TipoEventoOpcao[]>(`${this.apiUrl}/opcoes`);
   }
 
   criar(request: TipoEventoRequest): Observable<TipoEvento> {

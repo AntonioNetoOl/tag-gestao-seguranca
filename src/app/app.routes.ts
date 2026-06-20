@@ -35,12 +35,7 @@ export const routes: Routes = [
       },
       {
         path: 'tipos-evento',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Tipos de evento',
-          description: 'Configuração dos tipos de evento.'
-        }
+        loadComponent: () => import('./features/tipos-evento').then((m) => m.TiposEventoComponent)
       },
       {
         path: 'usuarios',

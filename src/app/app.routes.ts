@@ -27,12 +27,7 @@ export const routes: Routes = [
       },
       {
         path: 'funcoes-funcionario',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Funções',
-          description: 'Cadastro das funções usadas no cadastro de funcionários.'
-        }
+        loadComponent: () => import('./features/funcoes-funcionario').then((m) => m.FuncoesFuncionarioComponent)
       },
       {
         path: 'casas',

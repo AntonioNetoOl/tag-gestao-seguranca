@@ -6,6 +6,7 @@ export interface Funcionario {
   chavePix: string | null;
   telefone: string | null;
   email: string | null;
+  funcaoFuncionarioId: string | null;
   funcao: string;
   ativo: boolean;
   dataCriacao: string;
@@ -19,6 +20,7 @@ export interface FuncionarioRequest {
   chavePix: string | null;
   telefone: string | null;
   email: string | null;
+  funcaoFuncionarioId: string;
   funcao: string;
 }
 

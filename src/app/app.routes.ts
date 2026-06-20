@@ -39,12 +39,7 @@ export const routes: Routes = [
       },
       {
         path: 'usuarios',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Usuários',
-          description: 'Tela reservada para o cadastro de usuários.'
-        }
+        loadComponent: () => import('./features/usuarios').then((m) => m.UsuariosComponent)
       },
       {
         path: 'eventos',

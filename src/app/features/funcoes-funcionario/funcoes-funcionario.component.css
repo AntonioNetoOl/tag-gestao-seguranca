@@ -83,14 +83,21 @@ th {
 }
 
 td strong,
-td span,
-td small {
+td small,
+td span:not(.tag-badge) {
   display: block;
 }
 
 td small {
   color: var(--tag-muted);
   margin-top: 4px;
+}
+
+.status-badge {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 74px;
+  width: fit-content;
 }
 
 .row-actions {

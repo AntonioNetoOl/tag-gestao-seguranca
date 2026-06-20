@@ -185,10 +185,10 @@ export class FuncoesFuncionarioPageComponent implements OnInit, OnDestroy {
   inativar(funcao: FuncaoFuncionario): void {
     this.abrirConfirmacao({
       tipo: 'pergunta',
-      titulo: 'Confirmar inativação',
-      mensagem: `Inativar a função ${funcao.nome}?`,
-      detalhe: 'A função deixará de aparecer nas opções de novos funcionários, mas os registros históricos permanecem preservados.',
-      textoPrincipal: 'Inativar',
+      titulo: 'Confirmar exclusão',
+      mensagem: `Excluir a função ${funcao.nome}?`,
+      detalhe: 'A função será removida das opções de novos funcionários, mas continuará preservada no histórico e nos relatórios.',
+      textoPrincipal: 'Excluir',
       textoSecundario: 'Cancelar',
       aoConfirmar: () => this.executarInativacao(funcao)
     });
@@ -197,10 +197,10 @@ export class FuncoesFuncionarioPageComponent implements OnInit, OnDestroy {
   ativar(funcao: FuncaoFuncionario): void {
     this.abrirConfirmacao({
       tipo: 'pergunta',
-      titulo: 'Confirmar reativação',
-      mensagem: `Reativar a função ${funcao.nome}?`,
-      detalhe: 'Após a reativação, ela voltará a aparecer no cadastro de funcionários.',
-      textoPrincipal: 'Reativar',
+      titulo: 'Confirmar restauração',
+      mensagem: `Restaurar a função ${funcao.nome}?`,
+      detalhe: 'Após a restauração, ela voltará a aparecer no cadastro de funcionários.',
+      textoPrincipal: 'Restaurar',
       textoSecundario: 'Cancelar',
       aoConfirmar: () => this.executarReativacao(funcao)
     });
@@ -227,13 +227,13 @@ export class FuncoesFuncionarioPageComponent implements OnInit, OnDestroy {
 
     this.funcoesService.inativar(funcao.id).subscribe({
       next: () => {
-        this.abrirSucesso('Registro atualizado', 'Função inativada com sucesso.');
+        this.abrirSucesso('Registro excluído', 'Função excluída com sucesso.');
         this.carregarFuncoes();
       },
       error: (error: unknown) => {
         const mensagem = obterMensagemErroApi(error);
         this.erro = mensagem;
-        this.abrirErro('Não foi possível inativar', mensagem);
+        this.abrirErro('Não foi possível excluir', mensagem);
       }
     });
   }
@@ -243,13 +243,13 @@ export class FuncoesFuncionarioPageComponent implements OnInit, OnDestroy {
 
     this.funcoesService.ativar(funcao.id).subscribe({
       next: () => {
-        this.abrirSucesso('Registro atualizado', 'Função reativada com sucesso.');
+        this.abrirSucesso('Registro restaurado', 'Função restaurada com sucesso.');
         this.carregarFuncoes();
       },
       error: (error: unknown) => {
         const mensagem = obterMensagemErroApi(error);
         this.erro = mensagem;
-        this.abrirErro('Não foi possível reativar', mensagem);
+        this.abrirErro('Não foi possível restaurar', mensagem);
       }
     });
   }

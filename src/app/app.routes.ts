@@ -36,12 +36,7 @@ export const routes: Routes = [
       },
       {
         path: 'casas',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Casas',
-          description: 'Cadastro das casas e locais de evento.'
-        }
+        loadComponent: () => import('./features/casas').then((m) => m.CasasComponent)
       },
       {
         path: 'tipos-evento',

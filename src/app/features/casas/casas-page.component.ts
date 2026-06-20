@@ -42,11 +42,11 @@ export class CasasPageComponent implements OnInit, OnDestroy {
   aviso: AvisoState | null = null;
 
   page = 1;
-  pageSize = 10;
+  pageSize = 5;
   busca = '';
-  readonly pageSizeOptions = [10, 20, 50];
+  readonly pageSizeOptions = [5, 10, 15, 20];
 
-  resultado: PagedResponse<Casa> = { items: [], page: 1, pageSize: 10, totalItems: 0, totalPages: 0 };
+  resultado: PagedResponse<Casa> = { items: [], page: 1, pageSize: 5, totalItems: 0, totalPages: 0 };
 
   readonly form = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(150)]],

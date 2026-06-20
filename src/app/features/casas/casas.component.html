@@ -1,0 +1,85 @@
+<section class="cadastro-page">
+  <div class="page-header tag-card">
+    <div>
+      <span class="eyebrow">Cadastros</span>
+      <h2>Casas</h2>
+      <p>Gerencie as casas e locais utilizados nos eventos.</p>
+    </div>
+    <button type="button" class="tag-button tag-button-primary" (click)="abrirNovo()">Nova casa</button>
+  </div>
+
+  @if (erro) { <div class="tag-alert tag-alert-error">{{ erro }}</div> }
+  @if (sucesso) { <div class="tag-alert tag-alert-success">{{ sucesso }}</div> }
+
+  <div class="filters tag-card">
+    <div class="tag-field search-field">
+      <label>Busca</label>
+      <input type="search" placeholder="Nome ou endereço" [value]="busca" (input)="alterarBusca($event)" (keyup.enter)="pesquisar()" />
+    </div>
+    <div class="filter-actions">
+      <button class="tag-button tag-button-secondary" type="button" (click)="limparFiltros()">Limpar</button>
+      <button class="tag-button tag-button-primary" type="button" (click)="pesquisar()">Pesquisar</button>
+    </div>
+  </div>
+
+  <div class="table-card tag-card">
+    <div class="table-toolbar">
+      <div><span class="card-kicker">Listagem</span><strong>{{ resultado.totalItems }} casa(s)</strong></div>
+      <label class="page-size">
+        <span>Itens por página</span>
+        <select [value]="pageSize" (change)="alterarPageSize($event)">
+          @for (option of pageSizeOptions; track option) { <option [value]="option">{{ option }}</option> }
+        </select>
+      </label>
+    </div>
+
+    @if (carregando) {
+      <div class="state-box">Carregando casas...</div>
+    } @else if (resultado.items.length === 0) {
+      <div class="state-box empty"><strong>Nenhuma casa encontrada.</strong><span>Altere os filtros ou cadastre uma nova casa.</span></div>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Casa</th><th>Endereço</th><th>CEP</th><th>Ações</th></tr></thead>
+          <tbody>
+            @for (casa of resultado.items; track casa.id) {
+              <tr>
+                <td><strong>{{ casa.nome }}</strong><small>Local de evento</small></td>
+                <td><span>{{ casa.endereco }}</span></td>
+                <td><span>{{ formatarCep(casa.cep) || 'Sem CEP' }}</span></td>
+                <td><div class="row-actions"><button class="icon-button" type="button" (click)="abrirEdicao(casa)">Editar</button><button class="icon-button danger" type="button" (click)="excluir(casa)">Excluir</button></div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span>Página {{ resultado.page }} de {{ resultado.totalPages || 1 }}</span>
+        <div><button class="tag-button tag-button-secondary" type="button" [disabled]="page <= 1" (click)="paginaAnterior()">Anterior</button><button class="tag-button tag-button-secondary" type="button" [disabled]="page >= resultado.totalPages" (click)="proximaPagina()">Próxima</button></div>
+      </div>
+    }
+  </div>
+</section>
+
+@if (modalAberto) {
+  <div class="tag-modal-backdrop">
+    <section class="tag-modal casa-modal">
+      <header class="tag-modal-header">
+        <div><span class="card-kicker">{{ modoFormulario === 'criar' ? 'Novo cadastro' : 'Editar cadastro' }}</span><h2>{{ modoFormulario === 'criar' ? 'Cadastrar casa' : 'Editar casa' }}</h2></div>
+        <button type="button" class="modal-close" (click)="fecharModal()">×</button>
+      </header>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="tag-modal-body form-grid">
+          <div class="tag-field span-2"><label>Nome *</label><input formControlName="nome" placeholder="Ex.: Bizzutti Eventos" />@if (campoInvalido('nome')) { <small class="field-error">Informe o nome da casa.</small> }</div>
+          <div class="tag-field span-2"><label>Endereço *</label><input formControlName="endereco" placeholder="Rua, número, bairro e cidade" />@if (campoInvalido('endereco')) { <small class="field-error">Informe o endereço da casa.</small> }</div>
+          <div class="tag-field"><label>CEP</label><input formControlName="cep" placeholder="00000-000" maxlength="9" inputmode="numeric" (input)="aplicarMascaraCep($event)" /></div>
+        </div>
+        <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharModal()" [disabled]="salvando">Cancelar</button><button type="submit" class="tag-button tag-button-primary" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar casa' }}</button></footer>
+      </form>
+    </section>
+  </div>
+}
+
+@if (aviso) {
+  <div class="tag-modal-backdrop"><section class="tag-modal feedback-modal" [class.feedback-success]="aviso.tipo === 'sucesso'" [class.feedback-error]="aviso.tipo === 'erro'" [class.feedback-warning]="aviso.tipo === 'pergunta'"><div class="feedback-layout">@if (aviso.tipo === 'sucesso') { <svg class="success-check" viewBox="0 0 96 96" aria-hidden="true"><circle class="success-check-ring" cx="48" cy="48" r="38"></circle><path class="success-check-mark" d="M29 49.5 L42.5 63 L68 35"></path></svg> } @else { <svg class="warning-icon" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24"></circle><circle class="warning-pulse" cx="32" cy="32" r="26"></circle><text x="32" y="41" text-anchor="middle" font-size="30" font-weight="900">!</text></svg> }<div><span class="card-kicker">{{ aviso.tipo === 'sucesso' ? 'Tudo certo' : aviso.tipo === 'erro' ? 'Atenção necessária' : 'Confirmação' }}</span><h2>{{ aviso.titulo }}</h2><p>{{ aviso.mensagem }}</p>@if (aviso.detalhe) { <small>{{ aviso.detalhe }}</small> }</div><footer class="feedback-actions">@if (aviso.textoSecundario) { <button type="button" class="tag-button tag-button-secondary" (click)="fecharAviso()">{{ aviso.textoSecundario }}</button> } @if (aviso.tipo !== 'sucesso') { <button type="button" class="tag-button tag-button-primary" (click)="confirmarAviso()">{{ aviso.textoPrincipal }}</button> }</footer></div></section></div>
+}

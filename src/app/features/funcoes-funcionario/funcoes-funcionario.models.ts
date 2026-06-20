@@ -14,3 +14,12 @@ export interface FuncaoFuncionarioOpcao {
   id: string;
   nome: string;
 }
+
+export type FiltroAtivoFuncaoFuncionario = 'todos' | 'ativos' | 'inativos';
+
+export interface FuncaoFuncionarioListagemParams {
+  busca?: string;
+  ativo?: boolean;
+  page: number;
+  pageSize: number;
+}

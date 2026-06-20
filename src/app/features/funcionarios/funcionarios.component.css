@@ -255,6 +255,127 @@ td small {
   color: var(--tag-success);
 }
 
+.feedback-modal {
+  max-width: 520px;
+  padding: 26px;
+}
+
+.feedback-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.feedback-layout h2 {
+  margin: 4px 0 8px;
+}
+
+.feedback-layout p {
+  line-height: 1.55;
+  margin: 0;
+}
+
+.feedback-layout small {
+  color: var(--tag-muted);
+  display: block;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+.feedback-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.success-check {
+  height: 78px;
+  overflow: visible;
+  width: 78px;
+}
+
+.success-check-ring {
+  animation: successRing 0.7s ease-out forwards;
+  fill: none;
+  stroke: #158ccc;
+  stroke-dasharray: 239;
+  stroke-dashoffset: 239;
+  stroke-linecap: round;
+  stroke-width: 7;
+  transform: rotate(-18deg);
+  transform-origin: 48px 48px;
+}
+
+.success-check-mark {
+  animation: successMark 0.45s ease-out 0.45s forwards;
+  fill: none;
+  stroke: #158ccc;
+  stroke-dasharray: 70;
+  stroke-dashoffset: 70;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 9;
+}
+
+.feedback-success .card-kicker {
+  color: #15803d;
+}
+
+.warning-icon circle:first-child {
+  fill: #fff7ed;
+  stroke: #fed7aa;
+  stroke-width: 2;
+}
+
+.warning-icon .warning-pulse {
+  animation: warningPulse 1.5s ease-in-out infinite;
+  fill: none;
+  opacity: 0.35;
+  stroke: #fb923c;
+  stroke-width: 2;
+}
+
+.warning-icon text {
+  fill: #c2410c;
+}
+
+.feedback-error .warning-icon circle:first-child {
+  fill: #fef2f2;
+  stroke: #fecaca;
+}
+
+.feedback-error .warning-icon .warning-pulse {
+  stroke: #ef4444;
+}
+
+.feedback-error .warning-icon text {
+  fill: #b91c1c;
+}
+
+@keyframes successRing {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes successMark {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes warningPulse {
+  0% {
+    opacity: 0.55;
+    r: 23;
+  }
+
+  100% {
+    opacity: 0;
+    r: 31;
+  }
+}
+
 @media (max-width: 920px) {
   .page-header,
   .table-toolbar,
@@ -269,12 +390,14 @@ td small {
   }
 
   .filter-actions,
-  .pagination div {
+  .pagination div,
+  .feedback-actions {
     width: 100%;
   }
 
   .filter-actions .tag-button,
-  .pagination .tag-button {
+  .pagination .tag-button,
+  .feedback-actions .tag-button {
     flex: 1;
   }
 

@@ -10,6 +10,11 @@ export interface TipoEventoRequest {
   nome: string;
 }
 
+export interface TipoEventoOpcao {
+  id: string;
+  nome: string;
+}
+
 export type FiltroAtivoTipoEvento = 'todos' | 'ativos' | 'excluidos';
 
 export interface TipoEventoListagemParams {

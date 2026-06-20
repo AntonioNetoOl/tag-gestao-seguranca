@@ -10,7 +10,7 @@ import { Funcionario, FiltroAtivoFuncionario, FuncionarioRequest } from './funci
 import { FuncionariosService } from './funcionarios.service';
 
 type ModoFormulario = 'criar' | 'editar';
-type CampoFormulario = 'nomeCompleto' | 'rg' | 'cpf' | 'chavePix' | 'telefone' | 'email' | 'funcao';
+type CampoFormulario = 'nomeCompleto' | 'rg' | 'cpf' | 'chavePix' | 'telefone' | 'email' | 'funcaoFuncionarioId';
 type AvisoTipo = 'pergunta' | 'erro';
 
 interface AvisoState {
@@ -63,7 +63,7 @@ export class FuncionariosPageComponent implements OnInit {
     chavePix: ['', [Validators.maxLength(200)]],
     telefone: ['', [Validators.maxLength(15)]],
     email: ['', [Validators.email, Validators.maxLength(150)]],
-    funcao: ['', [Validators.required]]
+    funcaoFuncionarioId: ['', [Validators.required]]
   });
 
   readonly funcaoForm = this.formBuilder.nonNullable.group({ nome: ['', [Validators.required, Validators.maxLength(100)]] });
@@ -79,11 +79,14 @@ export class FuncionariosPageComponent implements OnInit {
     });
   }
 
-  carregarFuncoesFuncionario(selecionarId?: string): void {
+  carregarFuncoesFuncionario(selecionarIdOuNome?: string): void {
     this.funcoesFuncionarioService.listarOpcoes().subscribe({
       next: (funcoes) => {
         this.funcoesFuncionario = funcoes;
-        if (selecionarId) this.form.controls.funcao.setValue(selecionarId);
+        if (selecionarIdOuNome) {
+          const funcao = this.localizarFuncao(selecionarIdOuNome);
+          this.form.controls.funcaoFuncionarioId.setValue(funcao?.id ?? selecionarIdOuNome);
+        }
       },
       error: (error: unknown) => this.abrirErro('Não foi possível carregar as funções', obterMensagemErroApi(error))
     });
@@ -97,13 +100,21 @@ export class FuncionariosPageComponent implements OnInit {
   paginaAnterior(): void { if (this.page <= 1) return; this.page--; this.carregarFuncionarios(); }
   proximaPagina(): void { if (this.page >= this.resultado.totalPages) return; this.page++; this.carregarFuncionarios(); }
 
-  abrirNovo(): void { this.modoFormulario = 'criar'; this.funcionarioSelecionado = null; this.sucesso = ''; this.erro = ''; this.form.reset(); this.modalAberto = true; }
+  abrirNovo(): void {
+    this.modoFormulario = 'criar';
+    this.funcionarioSelecionado = null;
+    this.sucesso = '';
+    this.erro = '';
+    this.form.reset();
+    this.modalAberto = true;
+  }
 
   abrirEdicao(funcionario: Funcionario): void {
     this.modoFormulario = 'editar';
     this.funcionarioSelecionado = funcionario;
     this.sucesso = '';
     this.erro = '';
+    const funcao = this.localizarFuncao(funcionario.funcaoFuncionarioId ?? funcionario.funcao);
     this.form.setValue({
       nomeCompleto: funcionario.nomeCompleto,
       rg: this.formatarRg(funcionario.rg),
@@ -111,7 +122,7 @@ export class FuncionariosPageComponent implements OnInit {
       chavePix: funcionario.chavePix ?? '',
       telefone: funcionario.telefone ? this.formatarTelefone(funcionario.telefone) : '',
       email: funcionario.email ?? '',
-      funcao: funcionario.funcaoFuncionarioId ?? ''
+      funcaoFuncionarioId: funcao?.id ?? funcionario.funcaoFuncionarioId ?? ''
     });
     this.modalAberto = true;
   }
@@ -164,7 +175,8 @@ export class FuncionariosPageComponent implements OnInit {
 
   private validarCpf(control: AbstractControl): ValidationErrors | null { const cpf = String(control.value ?? '').replace(/\D/g, ''); if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return { cpf: true }; let soma = 0; for (let i = 0; i < 9; i++) soma += Number(cpf[i]) * (10 - i); let digito = (soma * 10) % 11; digito = digito === 10 ? 0 : digito; if (digito !== Number(cpf[9])) return { cpf: true }; soma = 0; for (let i = 0; i < 10; i++) soma += Number(cpf[i]) * (11 - i); digito = (soma * 10) % 11; digito = digito === 10 ? 0 : digito; return digito === Number(cpf[10]) ? null : { cpf: true }; }
   private converterFiltroAtivo(): boolean | undefined { if (this.filtroAtivo === 'ativos') return true; if (this.filtroAtivo === 'inativos') return false; return undefined; }
-  private montarRequest(): FuncionarioRequest { const raw = this.form.getRawValue(); const funcao = this.funcoesFuncionario.find((item) => item.id === raw.funcao); return { nomeCompleto: raw.nomeCompleto.trim(), rg: this.normalizarRg(raw.rg), cpf: this.somenteNumeros(raw.cpf), chavePix: this.normalizarOpcional(raw.chavePix), telefone: this.normalizarOpcional(this.somenteNumeros(raw.telefone)), email: this.normalizarOpcional(raw.email), funcaoFuncionarioId: raw.funcao, funcao: funcao?.nome ?? '' }; }
+  private montarRequest(): FuncionarioRequest { const raw = this.form.getRawValue(); const funcao = this.localizarFuncao(raw.funcaoFuncionarioId); return { nomeCompleto: raw.nomeCompleto.trim(), rg: this.normalizarRg(raw.rg), cpf: this.somenteNumeros(raw.cpf), chavePix: this.normalizarOpcional(raw.chavePix), telefone: this.normalizarOpcional(this.somenteNumeros(raw.telefone)), email: this.normalizarOpcional(raw.email), funcaoFuncionarioId: raw.funcaoFuncionarioId, funcao: funcao?.nome ?? '' }; }
+  private localizarFuncao(valor: string): FuncaoFuncionarioOpcao | undefined { return this.funcoesFuncionario.find((item) => item.id === valor || item.nome === valor); }
   private normalizarOpcional(valor: string): string | null { const normalizado = valor.trim(); return normalizado ? normalizado : null; }
   private somenteNumeros(valor: string): string { return valor.replace(/\D/g, ''); }
   private normalizarRg(valor: string): string { return valor.replace(/[^0-9a-zA-Z]/g, '').toUpperCase(); }

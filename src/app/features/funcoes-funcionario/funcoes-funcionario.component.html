@@ -20,7 +20,7 @@
       <select [value]="filtroAtivo" (change)="alterarFiltroAtivo($event)">
         <option value="todos">Todos</option>
         <option value="ativos">Ativos</option>
-        <option value="inativos">Inativos</option>
+        <option value="inativos">Excluídos</option>
       </select>
     </div>
     <div class="filter-actions">
@@ -46,8 +46,8 @@
             @for (funcao of resultado.items; track funcao.id) {
               <tr>
                 <td><strong>{{ funcao.nome }}</strong><small>Função de funcionário</small></td>
-                <td><span class="tag-badge" [class.tag-badge-success]="funcao.ativo" [class.tag-badge-neutral]="!funcao.ativo">{{ funcao.ativo ? 'Ativa' : 'Inativa' }}</span></td>
-                <td><div class="row-actions"><button class="icon-button action-icon-button" type="button" aria-label="Editar função" title="Editar função" (click)="abrirEdicao(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20Z"></path><path d="M13.5 6 18 10.5"></path></svg></button>@if (funcao.ativo) { <button class="icon-button action-icon-button danger" type="button" aria-label="Inativar função" title="Inativar função" (click)="inativar(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M8.5 12h7"></path></svg></button> } @else { <button class="icon-button action-icon-button success" type="button" aria-label="Reativar função" title="Reativar função" (click)="ativar(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h5a5 5 0 1 1-4.25 7.64"></path><path d="M7 7V3"></path><path d="M7 7H3"></path></svg></button> }</div></td>
+                <td><span class="tag-badge status-badge" [class.tag-badge-success]="funcao.ativo" [class.tag-badge-neutral]="!funcao.ativo">{{ funcao.ativo ? 'Ativa' : 'Excluída' }}</span></td>
+                <td><div class="row-actions"><button class="icon-button action-icon-button" type="button" aria-label="Editar função" title="Editar função" (click)="abrirEdicao(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20Z"></path><path d="M13.5 6 18 10.5"></path></svg></button>@if (funcao.ativo) { <button class="icon-button action-icon-button danger" type="button" aria-label="Excluir função" title="Excluir função" (click)="inativar(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M8 7l1-3h6l1 3"></path><path d="M7 7l1 13h8l1-13"></path></svg></button> } @else { <button class="icon-button action-icon-button success" type="button" aria-label="Restaurar função" title="Restaurar função" (click)="ativar(funcao)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h5a5 5 0 1 1-4.25 7.64"></path><path d="M7 7V3"></path><path d="M7 7H3"></path></svg></button> }</div></td>
               </tr>
             }
           </tbody>

@@ -69,6 +69,8 @@ export class CasasPageComponent implements OnInit, OnDestroy {
     this.casasService.listar({ busca: this.busca.trim() || undefined, page: this.page, pageSize: this.pageSize }).subscribe({
       next: (resultado) => {
         this.resultado = resultado;
+        this.page = resultado.page;
+        this.pageSize = this.normalizarPageSize(resultado.pageSize || this.pageSize);
         this.carregando = false;
       },
       error: (error: unknown) => {
@@ -94,7 +96,7 @@ export class CasasPageComponent implements OnInit, OnDestroy {
   }
 
   alterarPageSize(event: Event): void {
-    this.pageSize = Number((event.target as HTMLSelectElement).value);
+    this.pageSize = this.normalizarPageSize(Number((event.target as HTMLSelectElement).value));
     this.page = 1;
     this.carregarCasas();
   }
@@ -261,6 +263,10 @@ export class CasasPageComponent implements OnInit, OnDestroy {
       endereco: raw.endereco.trim(),
       cep: this.normalizarOpcional(this.somenteNumeros(raw.cep))
     };
+  }
+
+  private normalizarPageSize(valor: number): number {
+    return this.pageSizeOptions.includes(valor) ? valor : 5;
   }
 
   private normalizarOpcional(valor: string): string | null {

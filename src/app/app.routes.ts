@@ -23,48 +23,27 @@ export const routes: Routes = [
       },
       {
         path: 'funcionarios',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Funcionários',
-          description: 'Cadastro e manutenção da equipe operacional.'
-        }
+        loadComponent: () => import('./features/funcionarios').then((m) => m.FuncionariosComponent)
+      },
+      {
+        path: 'funcoes-funcionario',
+        loadComponent: () => import('./features/funcoes-funcionario').then((m) => m.FuncoesFuncionarioComponent)
       },
       {
         path: 'casas',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Casas',
-          description: 'Cadastro das casas e locais de evento.'
-        }
+        loadComponent: () => import('./features/casas').then((m) => m.CasasComponent)
       },
       {
         path: 'tipos-evento',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Tipos de evento',
-          description: 'Configuração dos tipos de evento.'
-        }
+        loadComponent: () => import('./features/tipos-evento').then((m) => m.TiposEventoComponent)
       },
       {
         path: 'usuarios',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Cadastros',
-          title: 'Usuários',
-          description: 'Tela reservada para o cadastro de usuários.'
-        }
+        loadComponent: () => import('./features/usuarios').then((m) => m.UsuariosComponent)
       },
       {
         path: 'eventos',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Operação',
-          title: 'Eventos',
-          description: 'Planejamento e acompanhamento dos eventos.'
-        }
+        loadComponent: () => import('./features/eventos').then((m) => m.EventosComponent)
       },
       {
         path: 'pagamentos',

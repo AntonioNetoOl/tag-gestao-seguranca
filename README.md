@@ -22,10 +22,16 @@ AntonioNetoOl/tag-gestao-seguranca-api
 
 ## Status atual
 
-A primeira base funcional do frontend foi implementada na branch:
+A base funcional do frontend foi implementada na branch:
 
 ```text
 feature/frontend-auth-dashboard
+```
+
+A etapa de cadastros está em desenvolvimento na branch:
+
+```text
+feature/cadastros-frontend
 ```
 
 Ela contém:
@@ -35,9 +41,13 @@ Ela contém:
 - `AuthService` com armazenamento de JWT;
 - interceptor HTTP com `Authorization: Bearer`;
 - guard de autenticação;
-- layout administrativo simples;
+- layout administrativo com menu lateral retrátil;
 - rota protegida `/dashboard`;
-- dashboard inicial consumindo `GET /api/dashboard`.
+- dashboard inicial consumindo `GET /api/dashboard`;
+- cadastro de funcionários com listagem, filtros, paginação, modal, máscaras e ações de ativar/inativar;
+- seleção de função no cadastro de funcionário;
+- cadastro rápido de função pelo botão `+` ao lado do campo Função;
+- cadastro de casas com listagem, busca, paginação, modal, máscara de CEP e exclusão protegida por confirmação.
 
 ## Pré-requisitos
 
@@ -45,6 +55,7 @@ Ela contém:
 - Backend rodando em `http://localhost:5000`.
 - PostgreSQL local ativo.
 - Usuário master configurado no backend.
+- Tabela `funcoes_funcionario` criada no backend para alimentar o campo Função.
 
 ## Como executar localmente
 
@@ -80,6 +91,30 @@ Essa URL está configurada em:
 src/environments/environment.ts
 ```
 
+## Integração com funções de funcionário
+
+O campo Função do cadastro de funcionários consome:
+
+```text
+GET /api/funcoes-funcionario/opcoes
+POST /api/funcoes-funcionario
+```
+
+A criação rápida pelo botão `+` abre um modal simples, grava a função no backend e recarrega a lista de opções.
+
+## Integração com casas
+
+O cadastro de casas consome:
+
+```text
+GET    /api/casas
+POST   /api/casas
+PUT    /api/casas/{id}
+DELETE /api/casas/{id}
+```
+
+A exclusão é validada no backend e não é permitida quando a casa possui eventos vinculados.
+
 ## Estrutura principal
 
 ```text
@@ -91,7 +126,10 @@ src/
 │   │   └── layout
 │   └── features
 │       ├── auth
-│       └── dashboard
+│       ├── dashboard
+│       ├── casas
+│       ├── funcionarios
+│       └── funcoes-funcionario
 ├── environments
 ├── index.html
 ├── main.ts
@@ -103,6 +141,7 @@ src/
 - Login
 - Dashboard
 - Cadastro de funcionários
+- Cadastro de funções de funcionário
 - Cadastro de casas
 - Cadastro de tipos de evento
 - Cadastro de eventos

@@ -62,6 +62,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   dataInicio = '';
   dataFim = '';
   readonly pageSizeOptions = [5, 10, 15, 20];
+  readonly dataMinimaEvento = this.obterDataHojeInput();
 
   resultado: PagedResponse<Evento> = { items: [], page: 1, pageSize: 5, totalItems: 0, totalPages: 0 };
 
@@ -69,7 +70,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     casaId: ['', [Validators.required]],
     tipoEventoId: ['', [Validators.required]],
     nome: ['', [Validators.required, Validators.maxLength(200)]],
-    dataEvento: ['', [Validators.required]],
+    dataEvento: ['', [Validators.required, this.dataEventoMinimaHoje()]],
     horaInicio: ['', [Validators.required]],
     horaFim: ['', [Validators.required]],
     valorDiaria: [this.formatarMoedaInput(0), [Validators.required, this.valorMonetarioMinimo(0.01)]],
@@ -202,6 +203,12 @@ export class EventosPageComponent implements OnInit, OnDestroy {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+
+      if (this.form.controls.dataEvento.hasError('dataPassada')) {
+        this.abrirErro('Data inválida', `A data do evento não pode ser anterior a hoje (${this.formatarDataInputPtBr(this.dataMinimaEvento)}).`);
+        return;
+      }
+
       this.abrirErro('Revise o cadastro', 'Existem campos obrigatórios ou inválidos no formulário.', 'Confira casa, tipo, data, horários e valores antes de salvar.');
       return;
     }
@@ -295,6 +302,12 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return controle.invalid && (controle.dirty || controle.touched);
   }
 
+  mensagemErroDataEvento(): string {
+    const controle = this.form.controls.dataEvento;
+    if (controle.hasError('dataPassada')) return `A data não pode ser anterior a hoje (${this.formatarDataInputPtBr(this.dataMinimaEvento)}).`;
+    return 'Informe a data.';
+  }
+
   podeExcluir(evento: Evento): boolean {
     return evento.status !== 'Cancelado' && evento.status !== 'Finalizado';
   }
@@ -364,12 +377,26 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return String(valor ?? '').slice(0, 10);
   }
 
+  private formatarDataInputPtBr(valor: string): string {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return valor;
+    const [ano, mes, dia] = valor.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
   private formatarHorarioInput(valor: string): string {
     return String(valor ?? '').slice(0, 5);
   }
 
   private normalizarHorario(valor: string): string {
     return valor.length === 5 ? `${valor}:00` : valor;
+  }
+
+  private obterDataHojeInput(): string {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
   }
 
   private definirMoeda(campo: CampoMoeda, valor: number, input?: HTMLInputElement): void {
@@ -410,6 +437,14 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return (control: AbstractControl): ValidationErrors | null => {
       const valor = this.converterTextoMoedaParaNumero(control.value);
       return valor >= minimo ? null : { valorMonetarioMinimo: true };
+    };
+  }
+
+  private dataEventoMinimaHoje(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const valor = String(control.value ?? '');
+      if (!valor) return null;
+      return valor >= this.dataMinimaEvento ? null : { dataPassada: true };
     };
   }
 

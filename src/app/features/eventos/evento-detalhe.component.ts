@@ -9,6 +9,7 @@ import { Evento, EventoFuncionario, EventoStatus } from './eventos.models';
 import { EventosService } from './eventos.service';
 
 type AvisoTipo = 'erro' | 'sucesso';
+type FormatoRelatorio = 'excel' | 'pdf';
 
 interface AvisoState {
   tipo: AvisoTipo;
@@ -30,6 +31,7 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   private readonly funcionariosService = inject(FuncionariosService);
   private readonly formBuilder = inject(FormBuilder);
   private avisoTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private relatorioTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   eventoId = '';
   evento: Evento | null = null;
@@ -48,6 +50,8 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   funcionarioParaRemover: EventoFuncionario | null = null;
   modalSubstituicaoAberto = false;
   funcionarioParaSubstituir: EventoFuncionario | null = null;
+  modalRelatorioAberto = false;
+  relatorioSucesso = false;
 
   readonly adicionarForm = this.formBuilder.nonNullable.group({
     funcionarioId: ['', [Validators.required]]
@@ -76,6 +80,7 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.limparTimerAviso();
+    this.limparTimerRelatorio();
   }
 
   carregarEvento(): void {
@@ -123,14 +128,14 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   adicionarFuncionario(): void {
     this.erro = '';
 
-    if (this.escalaBloqueada()) {
-      this.abrirErro('Escala bloqueada', 'Evento cancelado não pode ter escala alterada.');
+    if (!this.podeAdicionarFuncionario()) {
+      this.abrirErro('Escala bloqueada', 'Após finalizar a escala, não é possível adicionar novos funcionários.');
       return;
     }
 
     if (this.adicionarForm.invalid) {
       this.adicionarForm.markAllAsTouched();
-      this.abrirErro('Selecione um funcionário', 'Escolha um funcionário ativo para adicionar à escala.');
+      this.abrirErro('Selecione um funcionário', 'Escolha um funcionário para adicionar à escala.');
       return;
     }
 
@@ -171,33 +176,38 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     });
   }
 
-  emitirEscalaExcel(): void {
+  abrirRelatorio(): void {
     if (!this.podeEmitirEscala()) return;
-
-    this.exportando = true;
-    this.eventosService.exportarEscalaExcel(this.eventoId).subscribe({
-      next: (arquivo) => {
-        this.exportando = false;
-        this.baixarArquivo(arquivo, `${this.nomeArquivoEscala()}.xlsx`);
-      },
-      error: (error: unknown) => {
-        this.exportando = false;
-        this.abrirErro('Não foi possível emitir a escala', obterMensagemErroApi(error));
-      }
-    });
+    this.limparTimerRelatorio();
+    this.relatorioSucesso = false;
+    this.modalRelatorioAberto = true;
   }
 
-  emitirEscalaPdf(): void {
+  fecharRelatorio(): void {
+    if (this.exportando) return;
+    this.limparTimerRelatorio();
+    this.modalRelatorioAberto = false;
+    this.relatorioSucesso = false;
+  }
+
+  emitirRelatorio(formato: FormatoRelatorio): void {
     if (!this.podeEmitirEscala()) return;
 
     this.exportando = true;
-    this.eventosService.exportarEscalaPdf(this.eventoId).subscribe({
+    const operacao = formato === 'excel'
+      ? this.eventosService.exportarEscalaExcel(this.eventoId)
+      : this.eventosService.exportarEscalaPdf(this.eventoId);
+
+    operacao.subscribe({
       next: (arquivo) => {
+        this.baixarArquivo(arquivo, `${this.nomeArquivoEscala()}.${formato === 'excel' ? 'xlsx' : 'pdf'}`);
         this.exportando = false;
-        this.baixarArquivo(arquivo, `${this.nomeArquivoEscala()}.pdf`);
+        this.relatorioSucesso = true;
+        this.relatorioTimeoutId = setTimeout(() => this.fecharRelatorio(), 1200);
       },
       error: (error: unknown) => {
         this.exportando = false;
+        this.fecharRelatorio();
         this.abrirErro('Não foi possível emitir a escala', obterMensagemErroApi(error));
       }
     });
@@ -293,6 +303,10 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     return this.evento?.status === 'Cancelado';
   }
 
+  podeAdicionarFuncionario(): boolean {
+    return this.evento?.status === 'Rascunho' && !this.escalaBloqueada() && !this.carregandoFuncionarios && !this.processando;
+  }
+
   podeFinalizarEscala(): boolean {
     return this.evento?.status === 'Rascunho' && this.escala.length > 0 && !this.escalaBloqueada() && !this.processando;
   }
@@ -305,11 +319,28 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     return !this.escalaBloqueada() && !funcionario.pago;
   }
 
+  formatarPeriodoEvento(evento: Evento): string {
+    const dataInicio = this.extrairDataUtc(evento.dataEvento);
+    if (!dataInicio) return this.formatarData(evento.dataEvento);
+
+    const inicio = this.formatarHorario(evento.horaInicio);
+    const fim = this.formatarHorario(evento.horaFim);
+    const terminaNoDiaSeguinte = inicio !== '-' && fim !== '-' && fim < inicio;
+
+    if (!terminaNoDiaSeguinte) {
+      return this.formatarData(evento.dataEvento);
+    }
+
+    const dataFim = new Date(dataInicio);
+    dataFim.setUTCDate(dataFim.getUTCDate() + 1);
+
+    return `${this.formatarDataPorDate(dataInicio)} - ${this.formatarDataPorDate(dataFim)}`;
+  }
+
   formatarData(valor: string): string {
-    if (!valor) return '-';
-    const data = new Date(valor);
-    if (Number.isNaN(data.getTime())) return valor;
-    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(data);
+    const data = this.extrairDataUtc(valor);
+    if (!data) return valor || '-';
+    return this.formatarDataPorDate(data);
   }
 
   formatarHorario(valor: string): string {
@@ -361,6 +392,18 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     return `escala-${nomeSeguro || this.eventoId}`;
   }
 
+  private extrairDataUtc(valor: string): Date | null {
+    const texto = String(valor ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return null;
+
+    const [ano, mes, dia] = texto.split('-').map(Number);
+    return new Date(Date.UTC(ano, mes - 1, dia));
+  }
+
+  private formatarDataPorDate(data: Date): string {
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(data);
+  }
+
   private abrirErro(titulo: string, mensagem: string, detalhe?: string): void {
     this.limparTimerAviso();
     this.aviso = { tipo: 'erro', titulo, mensagem, detalhe };
@@ -376,6 +419,13 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     if (this.avisoTimeoutId) {
       clearTimeout(this.avisoTimeoutId);
       this.avisoTimeoutId = null;
+    }
+  }
+
+  private limparTimerRelatorio(): void {
+    if (this.relatorioTimeoutId) {
+      clearTimeout(this.relatorioTimeoutId);
+      this.relatorioTimeoutId = null;
     }
   }
 }

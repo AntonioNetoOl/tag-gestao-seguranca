@@ -125,8 +125,9 @@ export class EventosPageComponent implements OnInit, OnDestroy {
         this.carregando = false;
       },
       error: (error: unknown) => {
-        this.erro = obterMensagemErroApi(error);
+        const mensagem = obterMensagemErroApi(error);
         this.carregando = false;
+        this.abrirErro('Não foi possível carregar os eventos', mensagem);
       }
     });
   }

@@ -245,14 +245,25 @@ td small {
 }
 
 .confirmacao-modal {
-  padding-top: 26px;
+  padding-top: 0;
 }
 
-.question-icon {
-  height: 78px;
-  margin: 0 0 14px 24px;
+.confirmacao-header {
+  align-items: center;
+}
+
+.confirmacao-heading {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  min-width: 0;
+}
+
+.confirmacao-icon {
+  flex: 0 0 auto;
+  height: 64px;
   overflow: visible;
-  width: 78px;
+  width: 64px;
 }
 
 .question-icon circle:first-child {
@@ -408,8 +419,8 @@ textarea {
 }
 
 .warning-icon circle:first-child {
-  fill: #fef2f2;
-  stroke: #fecaca;
+  fill: #fff7ed;
+  stroke: #fed7aa;
   stroke-width: 2;
 }
 
@@ -417,11 +428,25 @@ textarea {
   animation: warningPulse 1.5s ease-in-out infinite;
   fill: none;
   opacity: 0.35;
-  stroke: #ef4444;
+  stroke: #fb923c;
   stroke-width: 2;
 }
 
 .warning-icon text {
+  animation: warningBounce 0.8s ease-out both;
+  fill: #c2410c;
+}
+
+.feedback-error .warning-icon circle:first-child {
+  fill: #fef2f2;
+  stroke: #fecaca;
+}
+
+.feedback-error .warning-icon .warning-pulse {
+  stroke: #ef4444;
+}
+
+.feedback-error .warning-icon text {
   fill: #b91c1c;
 }
 
@@ -449,6 +474,12 @@ textarea {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes warningBounce {
+  0% { opacity: 0; transform: translateY(-8px); }
+  60% { opacity: 1; transform: translateY(3px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 1120px) {
   .evento-resumo {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -468,6 +499,15 @@ textarea {
   .escala-footer {
     flex-direction: column;
     gap: 14px;
+  }
+
+  .confirmacao-heading {
+    align-items: flex-start;
+  }
+
+  .confirmacao-icon {
+    height: 56px;
+    width: 56px;
   }
 
   .escala-footer,

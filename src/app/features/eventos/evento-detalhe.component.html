@@ -165,7 +165,8 @@
 
 @if (modalCancelamentoFinalizacaoAberto) {
   <div class="tag-modal-backdrop">
-    <section class="tag-modal acao-modal">
+    <section class="tag-modal acao-modal confirmacao-modal">
+      <svg class="question-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24"></circle><circle class="question-pulse" cx="32" cy="32" r="26"></circle><text x="32" y="43" text-anchor="middle" font-size="34" font-weight="900">?</text></svg>
       <header class="tag-modal-header"><div><span class="card-kicker">Cancelar finalização</span><h2>Voltar escala para rascunho?</h2></div><button type="button" class="modal-close" (click)="fecharConfirmacaoCancelamentoFinalizacao()">×</button></header>
       <div class="tag-modal-body">
         <p>Confirma o cancelamento da finalização da escala?</p>

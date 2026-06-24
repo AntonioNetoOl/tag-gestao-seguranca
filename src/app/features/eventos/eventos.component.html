@@ -8,8 +8,6 @@
     <button type="button" class="tag-button tag-button-primary" (click)="abrirNovo()">Novo evento</button>
   </div>
 
-  @if (erro) { <div class="tag-alert tag-alert-error">{{ erro }}</div> }
-
   <div class="filters tag-card">
     <div class="tag-field search-field"><label>Busca</label><input type="search" placeholder="Nome do evento" [value]="nome" (input)="alterarNome($event)" (keyup.enter)="pesquisar()" /></div>
     <div class="tag-field"><label>Casa</label><select [value]="casaId" (change)="alterarCasa($event)"><option value="">Todas</option>@for (casa of casas; track casa.id) { <option [value]="casa.id">{{ casa.nome }}</option> }</select></div>

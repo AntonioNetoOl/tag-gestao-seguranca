@@ -4,7 +4,15 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { PagedResponse } from '../../core/models/paged-response.model';
-import { Evento, EventoListagemParams, EventoRequest } from './eventos.models';
+import {
+  Evento,
+  EventoFuncionario,
+  EventoFuncionarioRequest,
+  EventoListagemParams,
+  EventoRequest,
+  RemoverFuncionarioEventoRequest,
+  SubstituirFuncionarioEventoRequest
+} from './eventos.models';
 
 @Injectable({ providedIn: 'root' })
 export class EventosService {
@@ -25,6 +33,10 @@ export class EventosService {
     return this.http.get<PagedResponse<Evento>>(this.apiUrl, { params: httpParams });
   }
 
+  obter(id: string): Observable<Evento> {
+    return this.http.get<Evento>(`${this.apiUrl}/${id}`);
+  }
+
   criar(request: EventoRequest): Observable<Evento> {
     return this.http.post<Evento>(this.apiUrl, request);
   }
@@ -35,5 +47,22 @@ export class EventosService {
 
   cancelar(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  listarFuncionarios(eventoId: string, incluirRemovidos = false): Observable<EventoFuncionario[]> {
+    const params = new HttpParams().set('incluirRemovidos', incluirRemovidos);
+    return this.http.get<EventoFuncionario[]>(`${this.apiUrl}/${eventoId}/funcionarios`, { params });
+  }
+
+  adicionarFuncionario(eventoId: string, request: EventoFuncionarioRequest): Observable<EventoFuncionario> {
+    return this.http.post<EventoFuncionario>(`${this.apiUrl}/${eventoId}/funcionarios`, request);
+  }
+
+  removerFuncionario(eventoId: string, funcionarioId: string, request: RemoverFuncionarioEventoRequest): Observable<void> {
+    return this.http.request<void>('DELETE', `${this.apiUrl}/${eventoId}/funcionarios/${funcionarioId}`, { body: request });
+  }
+
+  substituirFuncionario(eventoId: string, request: SubstituirFuncionarioEventoRequest): Observable<EventoFuncionario> {
+    return this.http.post<EventoFuncionario>(`${this.apiUrl}/${eventoId}/funcionarios/substituir`, request);
   }
 }

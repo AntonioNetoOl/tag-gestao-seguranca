@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { PagedResponse } from '../../core/models/paged-response.model';
-import { Funcionario, FuncionarioListagemParams, FuncionarioRequest } from './funcionarios.models';
+import { Funcionario, FuncionarioListagemParams, FuncionarioOpcao, FuncionarioRequest } from './funcionarios.models';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +27,11 @@ export class FuncionariosService {
     return this.http.get<PagedResponse<Funcionario>>(this.apiUrl, { params: httpParams });
   }
 
+  listarOpcoes(apenasAtivos = true): Observable<FuncionarioOpcao[]> {
+    const params = new HttpParams().set('apenasAtivos', apenasAtivos);
+    return this.http.get<FuncionarioOpcao[]>(`${this.apiUrl}/opcoes`, { params });
+  }
+
   criar(request: FuncionarioRequest): Observable<Funcionario> {
     return this.http.post<Funcionario>(this.apiUrl, request);
   }
@@ -36,7 +41,7 @@ export class FuncionariosService {
   }
 
   inativar(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.request<void>('DELETE', `${this.apiUrl}/${id}`);
   }
 
   ativar(id: string): Observable<void> {

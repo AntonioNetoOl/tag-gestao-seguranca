@@ -135,7 +135,7 @@
     <footer class="escala-footer">
       <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeEmitirEscala()" (click)="abrirRelatorio()">Emitir Relatório da Escala</button>
       <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeCancelarFinalizacaoEscala()" (click)="abrirConfirmacaoCancelamentoFinalizacao()">Cancelar finalização</button>
-      <button type="button" class="tag-button tag-button-primary" [disabled]="!podeFinalizarEscala()" (click)="finalizarEscala()">Finalizar escala</button>
+      <button type="button" class="tag-button tag-button-primary" [disabled]="!podeFinalizarEscala()" (click)="abrirConfirmacaoFinalizacaoEscala()">Finalizar escala</button>
     </footer>
   </div>
 </section>
@@ -163,11 +163,35 @@
   </div>
 }
 
+@if (modalFinalizacaoEscalaAberto) {
+  <div class="tag-modal-backdrop">
+    <section class="tag-modal acao-modal confirmacao-modal">
+      <header class="tag-modal-header confirmacao-header">
+        <div class="confirmacao-heading">
+          <svg class="warning-icon confirmacao-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24"></circle><circle class="warning-pulse" cx="32" cy="32" r="26"></circle><text x="32" y="41" text-anchor="middle" font-size="30" font-weight="900">!</text></svg>
+          <div><span class="card-kicker">Finalizar escala</span><h2>Confirmar finalização da escala?</h2></div>
+        </div>
+        <button type="button" class="modal-close" (click)="fecharConfirmacaoFinalizacaoEscala()">×</button>
+      </header>
+      <div class="tag-modal-body">
+        <p>Ao finalizar, o evento será marcado como Escalado e a inclusão de novos funcionários será bloqueada.</p>
+        <small>Depois disso, ajustes devem ser feitos por substituição, remoção ou cancelando a finalização da escala.</small>
+      </div>
+      <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharConfirmacaoFinalizacaoEscala()" [disabled]="processando">Voltar</button><button type="button" class="tag-button tag-button-primary" (click)="confirmarFinalizacaoEscala()" [disabled]="processando">{{ processando ? 'Finalizando...' : 'Confirmar finalização' }}</button></footer>
+    </section>
+  </div>
+}
+
 @if (modalCancelamentoFinalizacaoAberto) {
   <div class="tag-modal-backdrop">
     <section class="tag-modal acao-modal confirmacao-modal">
-      <svg class="question-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24"></circle><circle class="question-pulse" cx="32" cy="32" r="26"></circle><text x="32" y="43" text-anchor="middle" font-size="34" font-weight="900">?</text></svg>
-      <header class="tag-modal-header"><div><span class="card-kicker">Cancelar finalização</span><h2>Voltar escala para rascunho?</h2></div><button type="button" class="modal-close" (click)="fecharConfirmacaoCancelamentoFinalizacao()">×</button></header>
+      <header class="tag-modal-header confirmacao-header">
+        <div class="confirmacao-heading">
+          <svg class="question-icon confirmacao-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24"></circle><circle class="question-pulse" cx="32" cy="32" r="26"></circle><text x="32" y="43" text-anchor="middle" font-size="34" font-weight="900">?</text></svg>
+          <div><span class="card-kicker">Cancelar finalização</span><h2>Voltar escala para rascunho?</h2></div>
+        </div>
+        <button type="button" class="modal-close" (click)="fecharConfirmacaoCancelamentoFinalizacao()">×</button>
+      </header>
       <div class="tag-modal-body">
         <p>Confirma o cancelamento da finalização da escala?</p>
         <small>Isso libera a inclusão de novos funcionários e registra a ação no histórico operacional. Não é permitido quando o evento já está finalizado ou possui vínculo pago.</small>

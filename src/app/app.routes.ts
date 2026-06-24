@@ -60,12 +60,7 @@ export const routes: Routes = [
       },
       {
         path: 'relatorios',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Gestão',
-          title: 'Relatórios',
-          description: 'Exportações e consultas consolidadas.'
-        }
+        loadComponent: () => import('./features/relatorios').then((m) => m.RelatoriosComponent)
       },
       {
         path: '',

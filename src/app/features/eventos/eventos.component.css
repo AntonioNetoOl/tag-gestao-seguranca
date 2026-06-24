@@ -24,7 +24,7 @@
   align-items: end;
   display: grid;
   gap: 16px;
-  grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 0.9fr) 150px 150px 150px auto;
+  grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 0.9fr) 150px 150px auto;
   padding: 20px;
 }
 

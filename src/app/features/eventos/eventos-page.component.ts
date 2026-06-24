@@ -1,5 +1,5 @@
-import { AbstractControl, Component, inject, OnDestroy, OnInit, ValidationErrors, ValidatorFn } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 import { obterMensagemErroApi } from '../../core/api/api-error.util';
 import { PagedResponse } from '../../core/models/paged-response.model';
@@ -377,10 +377,10 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     this.valoresMoeda[campo] = valorNormalizado;
     const controle = this.form.controls[campo];
     controle.setValue(this.formatarMoedaInput(valorNormalizado), { emitEvent: false });
-    controle.markAsDirty();
     controle.updateValueAndValidity({ emitEvent: false });
 
     if (input) {
+      controle.markAsDirty();
       setTimeout(() => input.setSelectionRange(input.value.length, input.value.length));
     }
   }

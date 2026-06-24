@@ -174,6 +174,20 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   }
 
   abrirEdicao(evento: Evento): void {
+    if (evento.status === 'Escalado') {
+      this.abrirErro(
+        'Alteração bloqueada',
+        'Não é possível alterar este evento porque a escala já foi finalizada.',
+        'Para editar os dados do evento, primeiro abra a escala e clique em Cancelar finalização.'
+      );
+      return;
+    }
+
+    if (evento.status === 'Finalizado') {
+      this.abrirErro('Alteração bloqueada', 'Evento finalizado não pode ser alterado.');
+      return;
+    }
+
     this.modoFormulario = 'editar';
     this.eventoSelecionado = evento;
     this.erro = '';

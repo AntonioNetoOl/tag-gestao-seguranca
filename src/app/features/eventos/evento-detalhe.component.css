@@ -50,14 +50,6 @@
   padding: 20px 24px;
 }
 
-.toolbar-actions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
 .card-kicker {
   color: var(--tag-muted);
   display: block;
@@ -172,6 +164,15 @@ td small {
   width: 18px;
 }
 
+.escala-footer {
+  align-items: center;
+  border-top: 1px solid var(--tag-border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 18px 24px;
+}
+
 .state-box {
   align-items: center;
   color: var(--tag-muted);
@@ -191,9 +192,26 @@ td small {
   display: block;
 }
 
-.acao-modal {
+.acao-modal,
+.relatorio-modal {
   max-width: 640px;
   width: min(100%, 640px);
+}
+
+.relatorio-modal {
+  overflow: hidden;
+}
+
+.relatorio-feedback {
+  padding: 26px;
+}
+
+.report-actions {
+  justify-content: flex-end;
+}
+
+.report-actions .tag-button {
+  min-width: 140px;
 }
 
 .form-grid {
@@ -307,7 +325,8 @@ textarea {
   stroke-width: 9;
 }
 
-.feedback-success .card-kicker {
+.feedback-success .card-kicker,
+.relatorio-success .card-kicker {
   color: #15803d;
 }
 
@@ -358,13 +377,15 @@ textarea {
 
   .page-header,
   .table-toolbar,
-  .toolbar-actions {
+  .escala-footer {
     flex-direction: column;
     gap: 14px;
   }
 
-  .toolbar-actions,
-  .toolbar-actions .tag-button {
+  .escala-footer,
+  .escala-footer .tag-button,
+  .report-actions,
+  .report-actions .tag-button {
     width: 100%;
   }
 

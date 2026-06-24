@@ -244,6 +244,36 @@ td small {
   width: min(100%, 640px);
 }
 
+.confirmacao-modal {
+  padding-top: 26px;
+}
+
+.question-icon {
+  height: 78px;
+  margin: 0 0 14px 24px;
+  overflow: visible;
+  width: 78px;
+}
+
+.question-icon circle:first-child {
+  fill: #eff6ff;
+  stroke: #bfdbfe;
+  stroke-width: 2;
+}
+
+.question-icon .question-pulse {
+  animation: questionPulse 1.5s ease-in-out infinite;
+  fill: none;
+  opacity: 0.45;
+  stroke: #2563eb;
+  stroke-width: 2;
+}
+
+.question-icon text {
+  animation: questionBounce 0.8s ease-out both;
+  fill: #1d4ed8;
+}
+
 .relatorio-modal {
   overflow: hidden;
 }
@@ -406,6 +436,17 @@ textarea {
 @keyframes warningPulse {
   0% { opacity: 0.55; r: 23; }
   100% { opacity: 0; r: 31; }
+}
+
+@keyframes questionPulse {
+  0% { opacity: 0.55; r: 23; }
+  100% { opacity: 0; r: 31; }
+}
+
+@keyframes questionBounce {
+  0% { opacity: 0; transform: translateY(-8px); }
+  60% { opacity: 1; transform: translateY(3px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 1120px) {

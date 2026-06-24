@@ -313,11 +313,28 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return evento.status !== 'Cancelado' && evento.status !== 'Finalizado';
   }
 
+  formatarPeriodoEvento(evento: Evento): string {
+    const dataInicio = this.extrairDataUtc(evento.dataEvento);
+    if (!dataInicio) return this.formatarData(evento.dataEvento);
+
+    const inicio = this.formatarHorario(evento.horaInicio);
+    const fim = this.formatarHorario(evento.horaFim);
+    const terminaNoDiaSeguinte = inicio !== '-' && fim !== '-' && fim < inicio;
+
+    if (!terminaNoDiaSeguinte) {
+      return this.formatarData(evento.dataEvento);
+    }
+
+    const dataFim = new Date(dataInicio);
+    dataFim.setUTCDate(dataFim.getUTCDate() + 1);
+
+    return `${this.formatarDataPorDate(dataInicio)} - ${this.formatarDataPorDate(dataFim)}`;
+  }
+
   formatarData(valor: string): string {
-    if (!valor) return '-';
-    const data = new Date(valor);
-    if (Number.isNaN(data.getTime())) return valor;
-    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(data);
+    const data = this.extrairDataUtc(valor);
+    if (!data) return valor || '-';
+    return this.formatarDataPorDate(data);
   }
 
   formatarHorario(valor: string): string {
@@ -447,6 +464,18 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       if (!valor) return null;
       return valor >= this.dataMinimaEvento ? null : { dataPassada: true };
     };
+  }
+
+  private extrairDataUtc(valor: string): Date | null {
+    const texto = String(valor ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return null;
+
+    const [ano, mes, dia] = texto.split('-').map(Number);
+    return new Date(Date.UTC(ano, mes - 1, dia));
+  }
+
+  private formatarDataPorDate(data: Date): string {
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(data);
   }
 
   private abrirConfirmacao(aviso: AvisoState): void { this.limparTimerAviso(); this.aviso = aviso; }

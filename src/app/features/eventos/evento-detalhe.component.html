@@ -134,7 +134,7 @@
 
     <footer class="escala-footer">
       <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeEmitirEscala()" (click)="abrirRelatorio()">Emitir Relatório da Escala</button>
-      <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeCancelarFinalizacaoEscala()" (click)="cancelarFinalizacaoEscala()">Cancelar finalização</button>
+      <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeCancelarFinalizacaoEscala()" (click)="abrirConfirmacaoCancelamentoFinalizacao()">Cancelar finalização</button>
       <button type="button" class="tag-button tag-button-primary" [disabled]="!podeFinalizarEscala()" (click)="finalizarEscala()">Finalizar escala</button>
     </footer>
   </div>
@@ -159,6 +159,19 @@
         </div>
         <footer class="tag-modal-footer report-actions"><button type="button" class="tag-button tag-button-secondary" (click)="emitirRelatorio('excel')" [disabled]="exportando">{{ exportando ? 'Emitindo...' : 'Excel' }}</button><button type="button" class="tag-button tag-button-primary" (click)="emitirRelatorio('pdf')" [disabled]="exportando">{{ exportando ? 'Emitindo...' : 'PDF' }}</button></footer>
       }
+    </section>
+  </div>
+}
+
+@if (modalCancelamentoFinalizacaoAberto) {
+  <div class="tag-modal-backdrop">
+    <section class="tag-modal acao-modal">
+      <header class="tag-modal-header"><div><span class="card-kicker">Cancelar finalização</span><h2>Voltar escala para rascunho?</h2></div><button type="button" class="modal-close" (click)="fecharConfirmacaoCancelamentoFinalizacao()">×</button></header>
+      <div class="tag-modal-body">
+        <p>Confirma o cancelamento da finalização da escala?</p>
+        <small>Isso libera a inclusão de novos funcionários e registra a ação no histórico operacional. Não é permitido quando o evento já está finalizado ou possui vínculo pago.</small>
+      </div>
+      <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharConfirmacaoCancelamentoFinalizacao()" [disabled]="processando">Voltar</button><button type="button" class="tag-button tag-button-primary" (click)="confirmarCancelamentoFinalizacao()" [disabled]="processando">{{ processando ? 'Cancelando...' : 'Confirmar cancelamento' }}</button></footer>
     </section>
   </div>
 }

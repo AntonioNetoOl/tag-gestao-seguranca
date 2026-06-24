@@ -40,6 +40,7 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   carregandoEscala = true;
   carregandoFuncionarios = true;
   processando = false;
+  exportando = false;
   erro = '';
   aviso: AvisoState | null = null;
 
@@ -50,10 +51,6 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
 
   readonly adicionarForm = this.formBuilder.nonNullable.group({
     funcionarioId: ['', [Validators.required]]
-  });
-
-  readonly remocaoForm = this.formBuilder.nonNullable.group({
-    motivoRemocao: ['', [Validators.required, Validators.maxLength(250)]]
   });
 
   readonly substituicaoForm = this.formBuilder.nonNullable.group({
@@ -154,11 +151,62 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     });
   }
 
+  finalizarEscala(): void {
+    if (!this.podeFinalizarEscala()) {
+      this.abrirErro('Não foi possível finalizar', 'Adicione pelo menos um funcionário antes de finalizar a escala.');
+      return;
+    }
+
+    this.processando = true;
+    this.eventosService.finalizarEscala(this.eventoId).subscribe({
+      next: () => {
+        this.processando = false;
+        this.abrirSucesso('Escala finalizada', 'Evento marcado como Escalado com sucesso.');
+        this.recarregarDadosOperacionais();
+      },
+      error: (error: unknown) => {
+        this.processando = false;
+        this.abrirErro('Não foi possível finalizar a escala', obterMensagemErroApi(error));
+      }
+    });
+  }
+
+  emitirEscalaExcel(): void {
+    if (!this.podeEmitirEscala()) return;
+
+    this.exportando = true;
+    this.eventosService.exportarEscalaExcel(this.eventoId).subscribe({
+      next: (arquivo) => {
+        this.exportando = false;
+        this.baixarArquivo(arquivo, `${this.nomeArquivoEscala()}.xlsx`);
+      },
+      error: (error: unknown) => {
+        this.exportando = false;
+        this.abrirErro('Não foi possível emitir a escala', obterMensagemErroApi(error));
+      }
+    });
+  }
+
+  emitirEscalaPdf(): void {
+    if (!this.podeEmitirEscala()) return;
+
+    this.exportando = true;
+    this.eventosService.exportarEscalaPdf(this.eventoId).subscribe({
+      next: (arquivo) => {
+        this.exportando = false;
+        this.baixarArquivo(arquivo, `${this.nomeArquivoEscala()}.pdf`);
+      },
+      error: (error: unknown) => {
+        this.exportando = false;
+        this.abrirErro('Não foi possível emitir a escala', obterMensagemErroApi(error));
+      }
+    });
+  }
+
   abrirRemocao(funcionario: EventoFuncionario): void {
     if (!this.podeAlterarVinculo(funcionario)) return;
 
     this.funcionarioParaRemover = funcionario;
-    this.remocaoForm.reset({ motivoRemocao: '' });
     this.modalRemocaoAberto = true;
   }
 
@@ -166,21 +214,14 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     if (this.processando) return;
     this.modalRemocaoAberto = false;
     this.funcionarioParaRemover = null;
-    this.remocaoForm.reset({ motivoRemocao: '' });
   }
 
   removerFuncionario(): void {
     if (!this.funcionarioParaRemover) return;
 
-    if (this.remocaoForm.invalid) {
-      this.remocaoForm.markAllAsTouched();
-      return;
-    }
-
     this.processando = true;
-    const motivoRemocao = this.remocaoForm.getRawValue().motivoRemocao.trim();
 
-    this.eventosService.removerFuncionario(this.eventoId, this.funcionarioParaRemover.funcionarioId, { motivoRemocao }).subscribe({
+    this.eventosService.removerFuncionario(this.eventoId, this.funcionarioParaRemover.funcionarioId, { motivoRemocao: null }).subscribe({
       next: () => {
         this.processando = false;
         this.fecharRemocao();
@@ -252,6 +293,14 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     return this.evento?.status === 'Cancelado';
   }
 
+  podeFinalizarEscala(): boolean {
+    return this.evento?.status === 'Rascunho' && this.escala.length > 0 && !this.escalaBloqueada() && !this.processando;
+  }
+
+  podeEmitirEscala(): boolean {
+    return !!this.evento && this.evento.status !== 'Rascunho' && !this.escalaBloqueada() && this.escala.length > 0 && !this.exportando;
+  }
+
   podeAlterarVinculo(funcionario: EventoFuncionario): boolean {
     return !this.escalaBloqueada() && !funcionario.pago;
   }
@@ -289,6 +338,27 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   private recarregarDadosOperacionais(): void {
     this.carregarEvento();
     this.carregarEscala();
+  }
+
+  private baixarArquivo(arquivo: Blob, nomeArquivo: string): void {
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeArquivo;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private nomeArquivoEscala(): string {
+    const nomeEvento = this.evento?.nome?.trim() || this.eventoId;
+    const nomeSeguro = nomeEvento
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9-_]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase();
+
+    return `escala-${nomeSeguro || this.eventoId}`;
   }
 
   private abrirErro(titulo: string, mensagem: string, detalhe?: string): void {

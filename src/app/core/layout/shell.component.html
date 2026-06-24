@@ -89,6 +89,37 @@
           }
         </a>
       }
+
+      <div class="menu-group" routerLinkActive="group-active" [class.open]="relatoriosAberto && !sidebarCompacta">
+        <button
+          type="button"
+          class="menu-parent"
+          [attr.aria-expanded]="relatoriosAberto && !sidebarCompacta"
+          [attr.title]="sidebarCompacta ? 'Relatórios' : null"
+          (click)="alternarRelatorios()"
+        >
+          <span class="menu-icon"><app-menu-icon [name]="relatoriosIcon"></app-menu-icon></span>
+          @if (!sidebarCompacta) {
+            <span>Relatórios</span>
+            <span class="menu-chevron">›</span>
+          }
+        </button>
+
+        @if (!sidebarCompacta) {
+          <div class="submenu">
+            @for (item of relatoriosMenu; track item.route) {
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <span class="submenu-icon"><app-menu-icon [name]="item.icon"></app-menu-icon></span>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        }
+      </div>
     </nav>
 
     @if (!sidebarCompacta) {

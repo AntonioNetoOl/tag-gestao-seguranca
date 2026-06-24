@@ -29,6 +29,7 @@ export class EventosService {
     if (params.dataFim) httpParams = httpParams.set('dataFim', params.dataFim);
     if (params.nome) httpParams = httpParams.set('nome', params.nome);
     if (params.status) httpParams = httpParams.set('status', params.status);
+    if (params.apenasOperacao !== undefined) httpParams = httpParams.set('apenasOperacao', params.apenasOperacao);
 
     return this.http.get<PagedResponse<Evento>>(this.apiUrl, { params: httpParams });
   }
@@ -58,11 +59,23 @@ export class EventosService {
     return this.http.post<EventoFuncionario>(`${this.apiUrl}/${eventoId}/funcionarios`, request);
   }
 
+  finalizarEscala(eventoId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${eventoId}/funcionarios/finalizar`, null);
+  }
+
   removerFuncionario(eventoId: string, funcionarioId: string, request: RemoverFuncionarioEventoRequest): Observable<void> {
     return this.http.request<void>('DELETE', `${this.apiUrl}/${eventoId}/funcionarios/${funcionarioId}`, { body: request });
   }
 
   substituirFuncionario(eventoId: string, request: SubstituirFuncionarioEventoRequest): Observable<EventoFuncionario> {
     return this.http.post<EventoFuncionario>(`${this.apiUrl}/${eventoId}/funcionarios/substituir`, request);
+  }
+
+  exportarEscalaExcel(eventoId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${eventoId}/escala/excel`, { responseType: 'blob' });
+  }
+
+  exportarEscalaPdf(eventoId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${eventoId}/escala/pdf`, { responseType: 'blob' });
   }
 }

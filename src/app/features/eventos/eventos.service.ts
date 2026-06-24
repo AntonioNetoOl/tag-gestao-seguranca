@@ -63,6 +63,10 @@ export class EventosService {
     return this.http.post<void>(`${this.apiUrl}/${eventoId}/funcionarios/finalizar`, null);
   }
 
+  cancelarFinalizacaoEscala(eventoId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${eventoId}/funcionarios/cancelar-finalizacao`, null);
+  }
+
   removerFuncionario(eventoId: string, funcionarioId: string, request: RemoverFuncionarioEventoRequest): Observable<void> {
     return this.http.request<void>('DELETE', `${this.apiUrl}/${eventoId}/funcionarios/${funcionarioId}`, { body: request });
   }

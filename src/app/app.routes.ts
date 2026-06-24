@@ -59,8 +59,22 @@ export const routes: Routes = [
         }
       },
       {
-        path: 'relatorios',
+        path: 'relatorios/escalas',
         loadComponent: () => import('./features/relatorios').then((m) => m.RelatoriosComponent)
+      },
+      {
+        path: 'relatorios/pagamentos',
+        loadComponent: carregarPlaceholder,
+        data: {
+          eyebrow: 'Relatórios',
+          title: 'Relatório de pagamentos',
+          description: 'Será habilitado após a conclusão da aba Pagamentos.'
+        }
+      },
+      {
+        path: 'relatorios',
+        pathMatch: 'full',
+        redirectTo: 'relatorios/escalas'
       },
       {
         path: '',

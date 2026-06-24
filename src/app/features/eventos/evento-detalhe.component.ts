@@ -46,6 +46,11 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   erro = '';
   aviso: AvisoState | null = null;
 
+  buscaAdicionarFuncionario = '';
+  adicionarListaAberta = false;
+  buscaSubstituicaoFuncionario = '';
+  substituicaoListaAberta = false;
+
   modalRemocaoAberto = false;
   funcionarioParaRemover: EventoFuncionario | null = null;
   modalSubstituicaoAberto = false;
@@ -55,6 +60,10 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
 
   readonly adicionarForm = this.formBuilder.nonNullable.group({
     funcionarioId: ['', [Validators.required]]
+  });
+
+  readonly remocaoForm = this.formBuilder.nonNullable.group({
+    motivoRemocao: ['', [Validators.maxLength(250)]]
   });
 
   readonly substituicaoForm = this.formBuilder.nonNullable.group({
@@ -146,6 +155,8 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
       next: () => {
         this.processando = false;
         this.adicionarForm.reset({ funcionarioId: '' });
+        this.buscaAdicionarFuncionario = '';
+        this.adicionarListaAberta = false;
         this.abrirSucesso('Funcionário adicionado', 'Funcionário vinculado à escala com sucesso.');
         this.recarregarDadosOperacionais();
       },
@@ -172,6 +183,26 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
       error: (error: unknown) => {
         this.processando = false;
         this.abrirErro('Não foi possível finalizar a escala', obterMensagemErroApi(error));
+      }
+    });
+  }
+
+  cancelarFinalizacaoEscala(): void {
+    if (!this.podeCancelarFinalizacaoEscala()) {
+      this.abrirErro('Não foi possível cancelar a finalização', 'Evento finalizado ou cancelado não pode voltar para edição de escala.');
+      return;
+    }
+
+    this.processando = true;
+    this.eventosService.cancelarFinalizacaoEscala(this.eventoId).subscribe({
+      next: () => {
+        this.processando = false;
+        this.abrirSucesso('Finalização cancelada', 'A escala voltou para rascunho e permite novas inclusões.');
+        this.recarregarDadosOperacionais();
+      },
+      error: (error: unknown) => {
+        this.processando = false;
+        this.abrirErro('Não foi possível cancelar a finalização', obterMensagemErroApi(error));
       }
     });
   }
@@ -217,6 +248,8 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     if (!this.podeAlterarVinculo(funcionario)) return;
 
     this.funcionarioParaRemover = funcionario;
+    this.remocaoForm.reset({ motivoRemocao: '' });
+    this.configurarValidacaoRemocao();
     this.modalRemocaoAberto = true;
   }
 
@@ -224,14 +257,26 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     if (this.processando) return;
     this.modalRemocaoAberto = false;
     this.funcionarioParaRemover = null;
+    this.remocaoForm.reset({ motivoRemocao: '' });
   }
 
   removerFuncionario(): void {
     if (!this.funcionarioParaRemover) return;
 
+    this.configurarValidacaoRemocao();
+
+    if (this.remocaoForm.invalid) {
+      this.remocaoForm.markAllAsTouched();
+      return;
+    }
+
+    const motivo = this.exigeMotivoRemocao()
+      ? this.remocaoForm.getRawValue().motivoRemocao.trim()
+      : null;
+
     this.processando = true;
 
-    this.eventosService.removerFuncionario(this.eventoId, this.funcionarioParaRemover.funcionarioId, { motivoRemocao: null }).subscribe({
+    this.eventosService.removerFuncionario(this.eventoId, this.funcionarioParaRemover.funcionarioId, { motivoRemocao: motivo }).subscribe({
       next: () => {
         this.processando = false;
         this.fecharRemocao();
@@ -249,6 +294,8 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     if (!this.podeAlterarVinculo(funcionario)) return;
 
     this.funcionarioParaSubstituir = funcionario;
+    this.buscaSubstituicaoFuncionario = '';
+    this.substituicaoListaAberta = false;
     this.substituicaoForm.reset({ funcionarioNovoId: '', motivo: '' });
     this.modalSubstituicaoAberto = true;
   }
@@ -257,6 +304,8 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     if (this.processando) return;
     this.modalSubstituicaoAberto = false;
     this.funcionarioParaSubstituir = null;
+    this.buscaSubstituicaoFuncionario = '';
+    this.substituicaoListaAberta = false;
     this.substituicaoForm.reset({ funcionarioNovoId: '', motivo: '' });
   }
 
@@ -289,10 +338,61 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     });
   }
 
-  funcionariosDisponiveis(funcionarioIgnoradoId?: string): FuncionarioOpcao[] {
+  abrirListaAdicionar(): void {
+    if (!this.podeAdicionarFuncionario()) return;
+    this.adicionarListaAberta = true;
+  }
+
+  fecharListaAdicionarComDelay(): void {
+    setTimeout(() => this.adicionarListaAberta = false, 150);
+  }
+
+  alterarBuscaAdicionar(event: Event): void {
+    this.buscaAdicionarFuncionario = (event.target as HTMLInputElement).value;
+    this.adicionarForm.controls.funcionarioId.setValue('');
+    this.adicionarListaAberta = true;
+  }
+
+  selecionarFuncionarioAdicionar(funcionario: FuncionarioOpcao): void {
+    this.adicionarForm.controls.funcionarioId.setValue(funcionario.id);
+    this.adicionarForm.controls.funcionarioId.markAsDirty();
+    this.buscaAdicionarFuncionario = funcionario.nome;
+    this.adicionarListaAberta = false;
+  }
+
+  abrirListaSubstituicao(): void {
+    this.substituicaoListaAberta = true;
+  }
+
+  fecharListaSubstituicaoComDelay(): void {
+    setTimeout(() => this.substituicaoListaAberta = false, 150);
+  }
+
+  alterarBuscaSubstituicao(event: Event): void {
+    this.buscaSubstituicaoFuncionario = (event.target as HTMLInputElement).value;
+    this.substituicaoForm.controls.funcionarioNovoId.setValue('');
+    this.substituicaoListaAberta = true;
+  }
+
+  selecionarFuncionarioSubstituicao(funcionario: FuncionarioOpcao): void {
+    this.substituicaoForm.controls.funcionarioNovoId.setValue(funcionario.id);
+    this.substituicaoForm.controls.funcionarioNovoId.markAsDirty();
+    this.buscaSubstituicaoFuncionario = funcionario.nome;
+    this.substituicaoListaAberta = false;
+  }
+
+  funcionariosFiltradosParaAdicionar(): FuncionarioOpcao[] {
+    return this.filtrarFuncionarios(this.funcionariosDisponiveis(), this.buscaAdicionarFuncionario);
+  }
+
+  funcionariosFiltradosParaSubstituicao(): FuncionarioOpcao[] {
+    return this.filtrarFuncionarios(this.funcionariosDisponiveis(), this.buscaSubstituicaoFuncionario);
+  }
+
+  funcionariosDisponiveis(): FuncionarioOpcao[] {
     const idsEscalados = new Set(
       this.escala
-        .filter((funcionario) => !funcionario.removido && funcionario.funcionarioId !== funcionarioIgnoradoId)
+        .filter((funcionario) => !funcionario.removido)
         .map((funcionario) => funcionario.funcionarioId)
     );
 
@@ -311,12 +411,20 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
     return this.evento?.status === 'Rascunho' && this.escala.length > 0 && !this.escalaBloqueada() && !this.processando;
   }
 
+  podeCancelarFinalizacaoEscala(): boolean {
+    return this.evento?.status === 'Escalado' && !this.processando;
+  }
+
   podeEmitirEscala(): boolean {
     return !!this.evento && this.evento.status !== 'Rascunho' && !this.escalaBloqueada() && this.escala.length > 0 && !this.exportando;
   }
 
   podeAlterarVinculo(funcionario: EventoFuncionario): boolean {
     return !this.escalaBloqueada() && !funcionario.pago;
+  }
+
+  exigeMotivoRemocao(): boolean {
+    return this.evento?.status === 'Escalado' || this.evento?.status === 'Finalizado';
   }
 
   formatarPeriodoEvento(evento: Evento): string {
@@ -369,6 +477,35 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   private recarregarDadosOperacionais(): void {
     this.carregarEvento();
     this.carregarEscala();
+  }
+
+  private filtrarFuncionarios(funcionarios: FuncionarioOpcao[], termo: string): FuncionarioOpcao[] {
+    const busca = this.normalizarTexto(termo);
+
+    if (!busca) {
+      return funcionarios.slice(0, 20);
+    }
+
+    return funcionarios
+      .filter((funcionario) => this.normalizarTexto(funcionario.nome).includes(busca))
+      .slice(0, 20);
+  }
+
+  private normalizarTexto(valor: string): string {
+    return String(valor ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
+  private configurarValidacaoRemocao(): void {
+    const controle = this.remocaoForm.controls.motivoRemocao;
+    controle.clearValidators();
+    controle.addValidators(this.exigeMotivoRemocao()
+      ? [Validators.required, Validators.maxLength(250)]
+      : [Validators.maxLength(250)]);
+    controle.updateValueAndValidity({ emitEvent: false });
   }
 
   private baixarArquivo(arquivo: Blob, nomeArquivo: string): void {

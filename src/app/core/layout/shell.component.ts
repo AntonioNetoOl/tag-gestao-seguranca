@@ -24,9 +24,11 @@ export class ShellComponent {
 
   sidebarCompacta = false;
   cadastrosAberto = true;
+  relatoriosAberto = true;
 
   readonly dashboardItem: MenuItem = { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' };
   readonly cadastrosIcon: MenuIconName = 'cadastros';
+  readonly relatoriosIcon: MenuIconName = 'relatorios';
 
   readonly cadastrosMenu: MenuItem[] = [
     { label: 'Funcionários', route: '/funcionarios', icon: 'funcionarios' },
@@ -38,8 +40,12 @@ export class ShellComponent {
 
   readonly operacaoMenu: MenuItem[] = [
     { label: 'Eventos', route: '/eventos', icon: 'eventos' },
-    { label: 'Pagamentos', route: '/pagamentos', icon: 'pagamentos' },
-    { label: 'Relatórios', route: '/relatorios', icon: 'relatorios' }
+    { label: 'Pagamentos', route: '/pagamentos', icon: 'pagamentos' }
+  ];
+
+  readonly relatoriosMenu: MenuItem[] = [
+    { label: 'Escala', route: '/relatorios/escalas', icon: 'relatorios' },
+    { label: 'Pagamentos', route: '/relatorios/pagamentos', icon: 'pagamentos' }
   ];
 
   alternarMenu(): void {
@@ -54,6 +60,16 @@ export class ShellComponent {
     }
 
     this.cadastrosAberto = !this.cadastrosAberto;
+  }
+
+  alternarRelatorios(): void {
+    if (this.sidebarCompacta) {
+      this.sidebarCompacta = false;
+      this.relatoriosAberto = true;
+      return;
+    }
+
+    this.relatoriosAberto = !this.relatoriosAberto;
   }
 
   sair(): void {

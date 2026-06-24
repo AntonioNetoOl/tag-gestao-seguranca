@@ -257,11 +257,9 @@ a {
 
 .feedback-heading {
   align-items: center;
-  border-bottom: 1px solid var(--tag-border);
   display: flex;
   gap: 16px;
   min-width: 0;
-  padding-bottom: 16px;
 }
 
 .feedback-heading .success-check,
@@ -276,7 +274,7 @@ a {
 }
 
 .feedback-content {
-  padding-top: 16px;
+  padding-top: 14px;
 }
 
 .feedback-content p {

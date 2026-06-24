@@ -23,8 +23,8 @@ export class ShellComponent {
   readonly usuario = this.authService.usuarioAtual;
 
   sidebarCompacta = false;
-  cadastrosAberto = true;
-  relatoriosAberto = true;
+  cadastrosAberto = false;
+  relatoriosAberto = false;
 
   readonly dashboardItem: MenuItem = { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' };
   readonly cadastrosIcon: MenuIconName = 'cadastros';

@@ -4,17 +4,32 @@ Etapa: `feature/relatorios-escala`.
 
 ## Objetivo
 
-Habilitar a aba Relatórios para emissão do relatório geral de escalas.
+Habilitar o subnível **Relatórios > Escala** para emissão do relatório geral de escalas.
 
-Nesta etapa, o relatório de pagamentos fica apenas sinalizado como próxima etapa, porque será implementado depois da conclusão da aba Pagamentos.
+Nesta etapa, o subnível **Relatórios > Pagamentos** fica roteado como próxima etapa, porque será implementado depois da conclusão da aba Pagamentos.
 
-## Tela
+## Navegação
 
-Rota:
+A barra lateral possui o grupo expansível **Relatórios**, com os subníveis:
 
 ```text
-/relatorios
+Relatórios
+├── Escala
+└── Pagamentos
 ```
+
+Rotas:
+
+```text
+/relatorios/escalas
+/relatorios/pagamentos
+```
+
+A rota `/relatorios` redireciona para `/relatorios/escalas`.
+
+## Tela de Escala
+
+A tela de escala não possui card superior de apresentação. O conteúdo começa diretamente pelo card funcional do relatório.
 
 Filtros disponíveis para o relatório de escala:
 

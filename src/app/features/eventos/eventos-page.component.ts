@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, Component, inject, OnDestroy, OnInit, ValidationErrors, ValidatorFn } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { obterMensagemErroApi } from '../../core/api/api-error.util';
@@ -12,6 +12,7 @@ import { EventosService } from './eventos.service';
 
 type ModoFormulario = 'criar' | 'editar';
 type CampoFormulario = 'casaId' | 'tipoEventoId' | 'nome' | 'dataEvento' | 'horaInicio' | 'horaFim' | 'valorDiaria' | 'valorHoraExtra';
+type CampoMoeda = 'valorDiaria' | 'valorHoraExtra';
 type AvisoTipo = 'pergunta' | 'erro' | 'sucesso';
 
 interface AvisoState {
@@ -37,6 +38,10 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   private readonly tiposEventoService = inject(TiposEventoService);
   private readonly formBuilder = inject(FormBuilder);
   private avisoTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private valoresMoeda: Record<CampoMoeda, number> = {
+    valorDiaria: 0,
+    valorHoraExtra: 0
+  };
 
   carregando = true;
   carregandoOpcoes = true;
@@ -67,8 +72,8 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     dataEvento: ['', [Validators.required]],
     horaInicio: ['', [Validators.required]],
     horaFim: ['', [Validators.required]],
-    valorDiaria: [0, [Validators.required, Validators.min(0.01)]],
-    valorHoraExtra: [0, [Validators.required, Validators.min(0)]]
+    valorDiaria: [this.formatarMoedaInput(0), [Validators.required, this.valorMonetarioMinimo(0.01)]],
+    valorHoraExtra: [this.formatarMoedaInput(0), [Validators.required, this.valorMonetarioMinimo(0)]]
   });
 
   ngOnInit(): void {
@@ -151,7 +156,18 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     this.modoFormulario = 'criar';
     this.eventoSelecionado = null;
     this.erro = '';
-    this.form.reset({ casaId: '', tipoEventoId: '', nome: '', dataEvento: '', horaInicio: '', horaFim: '', valorDiaria: 0, valorHoraExtra: 0 });
+    this.definirMoeda('valorDiaria', 0);
+    this.definirMoeda('valorHoraExtra', 0);
+    this.form.reset({
+      casaId: '',
+      tipoEventoId: '',
+      nome: '',
+      dataEvento: '',
+      horaInicio: '',
+      horaFim: '',
+      valorDiaria: this.formatarMoedaInput(0),
+      valorHoraExtra: this.formatarMoedaInput(0)
+    });
     this.modalAberto = true;
   }
 
@@ -159,6 +175,8 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     this.modoFormulario = 'editar';
     this.eventoSelecionado = evento;
     this.erro = '';
+    this.definirMoeda('valorDiaria', evento.valorDiaria);
+    this.definirMoeda('valorHoraExtra', evento.valorHoraExtra);
     this.form.setValue({
       casaId: evento.casaId,
       tipoEventoId: evento.tipoEventoId,
@@ -166,8 +184,8 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       dataEvento: this.formatarDataInput(evento.dataEvento),
       horaInicio: this.formatarHorarioInput(evento.horaInicio),
       horaFim: this.formatarHorarioInput(evento.horaFim),
-      valorDiaria: evento.valorDiaria,
-      valorHoraExtra: evento.valorHoraExtra
+      valorDiaria: this.formatarMoedaInput(evento.valorDiaria),
+      valorHoraExtra: this.formatarMoedaInput(evento.valorHoraExtra)
     });
     this.modalAberto = true;
   }
@@ -230,6 +248,45 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  aoDigitarMoeda(campo: CampoMoeda, event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+    const teclasPermitidas = ['Tab', 'Enter', 'Escape', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    if (teclasPermitidas.includes(event.key)) return;
+
+    const input = event.target as HTMLInputElement;
+    const tudoSelecionado = input.selectionStart === 0 && input.selectionEnd === input.value.length;
+
+    if (/^\d$/.test(event.key)) {
+      event.preventDefault();
+      const valorBase = tudoSelecionado ? 0 : this.valoresMoeda[campo];
+      const novoValor = Math.trunc(valorBase * 10) + Number(event.key);
+      this.definirMoeda(campo, novoValor, input);
+      return;
+    }
+
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      event.preventDefault();
+      const novoValor = tudoSelecionado ? 0 : Math.trunc(this.valoresMoeda[campo] / 10);
+      this.definirMoeda(campo, novoValor, input);
+      return;
+    }
+
+    event.preventDefault();
+  }
+
+  aoColarMoeda(campo: CampoMoeda, event: ClipboardEvent): void {
+    event.preventDefault();
+    const texto = event.clipboardData?.getData('text') ?? '';
+    const valor = this.converterTextoMoedaParaNumero(texto);
+    this.definirMoeda(campo, valor, event.target as HTMLInputElement);
+  }
+
+  selecionarCampoMoeda(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    setTimeout(() => input.select());
+  }
+
   confirmarAviso(): void { const acao = this.aviso?.aoConfirmar; this.fecharAviso(); acao?.(); }
   fecharAviso(): void { this.limparTimerAviso(); this.aviso = null; }
 
@@ -254,7 +311,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   }
 
   formatarMoeda(valor: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0);
+    return this.formatarMoedaInput(valor);
   }
 
   classeStatus(status: EventoStatus): string {
@@ -298,8 +355,8 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       dataEvento: `${raw.dataEvento}T00:00:00`,
       horaInicio: this.normalizarHorario(raw.horaInicio),
       horaFim: this.normalizarHorario(raw.horaFim),
-      valorDiaria: Number(raw.valorDiaria),
-      valorHoraExtra: Number(raw.valorHoraExtra)
+      valorDiaria: this.converterTextoMoedaParaNumero(raw.valorDiaria),
+      valorHoraExtra: this.converterTextoMoedaParaNumero(raw.valorHoraExtra)
     };
   }
 
@@ -313,6 +370,47 @@ export class EventosPageComponent implements OnInit, OnDestroy {
 
   private normalizarHorario(valor: string): string {
     return valor.length === 5 ? `${valor}:00` : valor;
+  }
+
+  private definirMoeda(campo: CampoMoeda, valor: number, input?: HTMLInputElement): void {
+    const valorNormalizado = Number.isFinite(valor) && valor > 0 ? valor : 0;
+    this.valoresMoeda[campo] = valorNormalizado;
+    const controle = this.form.controls[campo];
+    controle.setValue(this.formatarMoedaInput(valorNormalizado), { emitEvent: false });
+    controle.markAsDirty();
+    controle.updateValueAndValidity({ emitEvent: false });
+
+    if (input) {
+      setTimeout(() => input.setSelectionRange(input.value.length, input.value.length));
+    }
+  }
+
+  private formatarMoedaInput(valor: number): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
+  }
+
+  private converterTextoMoedaParaNumero(valor: string): number {
+    const texto = String(valor ?? '').trim();
+    if (!texto) return 0;
+
+    const limpo = texto.replace(/[^\d,.-]/g, '');
+    if (!limpo) return 0;
+
+    if (limpo.includes(',')) {
+      const normalizado = limpo.replace(/\./g, '').replace(',', '.');
+      const numero = Number(normalizado);
+      return Number.isFinite(numero) ? numero : 0;
+    }
+
+    const numero = Number(limpo.replace(/\./g, ''));
+    return Number.isFinite(numero) ? numero : 0;
+  }
+
+  private valorMonetarioMinimo(minimo: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const valor = this.converterTextoMoedaParaNumero(control.value);
+      return valor >= minimo ? null : { valorMonetarioMinimo: true };
+    };
   }
 
   private abrirConfirmacao(aviso: AvisoState): void { this.limparTimerAviso(); this.aviso = aviso; }

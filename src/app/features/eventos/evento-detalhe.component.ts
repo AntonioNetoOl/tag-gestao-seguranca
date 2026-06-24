@@ -56,6 +56,7 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   modalSubstituicaoAberto = false;
   funcionarioParaSubstituir: EventoFuncionario | null = null;
   modalRelatorioAberto = false;
+  modalCancelamentoFinalizacaoAberto = false;
   relatorioSucesso = false;
 
   readonly adicionarForm = this.formBuilder.nonNullable.group({
@@ -185,6 +186,25 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
         this.abrirErro('Não foi possível finalizar a escala', obterMensagemErroApi(error));
       }
     });
+  }
+
+  abrirConfirmacaoCancelamentoFinalizacao(): void {
+    if (!this.podeCancelarFinalizacaoEscala()) {
+      this.abrirErro('Não foi possível cancelar a finalização', 'Evento finalizado ou cancelado não pode voltar para edição de escala.');
+      return;
+    }
+
+    this.modalCancelamentoFinalizacaoAberto = true;
+  }
+
+  fecharConfirmacaoCancelamentoFinalizacao(): void {
+    if (this.processando) return;
+    this.modalCancelamentoFinalizacaoAberto = false;
+  }
+
+  confirmarCancelamentoFinalizacao(): void {
+    this.modalCancelamentoFinalizacaoAberto = false;
+    this.cancelarFinalizacaoEscala();
   }
 
   cancelarFinalizacaoEscala(): void {

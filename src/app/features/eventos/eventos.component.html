@@ -31,7 +31,7 @@
             @for (evento of resultado.items; track evento.id) {
               <tr>
                 <td><strong>{{ evento.nome }}</strong><small>{{ evento.tipoEventoNome }}</small></td>
-                <td><span>{{ formatarData(evento.dataEvento) }}</span><small>{{ formatarHorario(evento.horaInicio) }} - {{ formatarHorario(evento.horaFim) }}</small></td>
+                <td><span>{{ formatarPeriodoEvento(evento) }}</span><small>{{ formatarHorario(evento.horaInicio) }} - {{ formatarHorario(evento.horaFim) }}</small></td>
                 <td><span>{{ evento.casaNome }}</span></td>
                 <td><span>{{ formatarMoeda(evento.valorDiaria) }}</span><small>Hora extra: {{ formatarMoeda(evento.valorHoraExtra) }}</small></td>
                 <td><span class="tag-badge status-badge {{ classeStatus(evento.status) }}">{{ evento.status }}</span></td>

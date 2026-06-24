@@ -56,14 +56,22 @@
     </div>
 
     <form class="adicionar-escala" [formGroup]="adicionarForm" (ngSubmit)="adicionarFuncionario()">
-      <div class="tag-field">
+      <div class="tag-field combo-field">
         <label>Adicionar funcionário</label>
-        <select formControlName="funcionarioId" [disabled]="!podeAdicionarFuncionario()">
-          <option value="">Selecione</option>
-          @for (funcionario of funcionariosDisponiveis(); track funcionario.id) {
-            <option [value]="funcionario.id">{{ funcionario.nome }}</option>
-          }
-        </select>
+        <input type="text" placeholder="Digite para pesquisar" [value]="buscaAdicionarFuncionario" [disabled]="!podeAdicionarFuncionario()" (focus)="abrirListaAdicionar()" (input)="alterarBuscaAdicionar($event)" (blur)="fecharListaAdicionarComDelay()" autocomplete="off" />
+        @if (adicionarListaAberta && podeAdicionarFuncionario()) {
+          <div class="combo-list">
+            @for (funcionario of funcionariosFiltradosParaAdicionar(); track funcionario.id) {
+              <button type="button" class="combo-option" (mousedown)="selecionarFuncionarioAdicionar(funcionario); $event.preventDefault()">{{ funcionario.nome }}</button>
+            }
+            @if (funcionariosFiltradosParaAdicionar().length === 0) {
+              <div class="combo-empty">Nenhum funcionário disponível.</div>
+            }
+          </div>
+        }
+        @if (adicionarForm.controls.funcionarioId.invalid && (adicionarForm.controls.funcionarioId.dirty || adicionarForm.controls.funcionarioId.touched)) {
+          <small class="field-error">Selecione um funcionário da lista.</small>
+        }
       </div>
       <button type="submit" class="tag-button tag-button-primary" [disabled]="!podeAdicionarFuncionario()">
         Adicionar à escala
@@ -126,6 +134,7 @@
 
     <footer class="escala-footer">
       <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeEmitirEscala()" (click)="abrirRelatorio()">Emitir Relatório da Escala</button>
+      <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeCancelarFinalizacaoEscala()" (click)="cancelarFinalizacaoEscala()">Cancelar finalização</button>
       <button type="button" class="tag-button tag-button-primary" [disabled]="!podeFinalizarEscala()" (click)="finalizarEscala()">Finalizar escala</button>
     </footer>
   </div>
@@ -158,11 +167,26 @@
   <div class="tag-modal-backdrop">
     <section class="tag-modal acao-modal">
       <header class="tag-modal-header"><div><span class="card-kicker">Remover da escala</span><h2>{{ funcionarioParaRemover.nomeCompleto }}</h2></div><button type="button" class="modal-close" (click)="fecharRemocao()">×</button></header>
-      <div class="tag-modal-body">
-        <p>Deseja realmente remover este funcionário da escala?</p>
-        <small>Use substituição quando outro funcionário entrou no lugar dele. Para erro de lançamento ou desistência antes do evento, a remoção simples é suficiente.</small>
-      </div>
-      <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharRemocao()" [disabled]="processando">Cancelar</button><button type="button" class="tag-button tag-button-primary" (click)="removerFuncionario()" [disabled]="processando">{{ processando ? 'Removendo...' : 'Remover funcionário' }}</button></footer>
+      <form [formGroup]="remocaoForm" (ngSubmit)="removerFuncionario()">
+        <div class="tag-modal-body form-grid">
+          <div class="span-2">
+            <p>Deseja realmente remover este funcionário da escala?</p>
+            @if (!exigeMotivoRemocao()) {
+              <small>Para erro de lançamento ou desistência antes da finalização, a remoção simples é suficiente.</small>
+            }
+          </div>
+          @if (exigeMotivoRemocao()) {
+            <div class="tag-field span-2">
+              <label>Motivo da remoção *</label>
+              <textarea formControlName="motivoRemocao" rows="4" placeholder="Ex.: ausência, troca operacional, solicitação do cliente"></textarea>
+              @if (remocaoForm.controls.motivoRemocao.invalid && (remocaoForm.controls.motivoRemocao.dirty || remocaoForm.controls.motivoRemocao.touched)) {
+                <small class="field-error">Informe o motivo da remoção.</small>
+              }
+            </div>
+          }
+        </div>
+        <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharRemocao()" [disabled]="processando">Cancelar</button><button type="submit" class="tag-button tag-button-primary" [disabled]="processando">{{ processando ? 'Removendo...' : 'Remover funcionário' }}</button></footer>
+      </form>
     </section>
   </div>
 }
@@ -173,14 +197,19 @@
       <header class="tag-modal-header"><div><span class="card-kicker">Substituir funcionário</span><h2>{{ funcionarioParaSubstituir.nomeCompleto }}</h2></div><button type="button" class="modal-close" (click)="fecharSubstituicao()">×</button></header>
       <form [formGroup]="substituicaoForm" (ngSubmit)="substituirFuncionario()">
         <div class="tag-modal-body form-grid">
-          <div class="tag-field span-2">
+          <div class="tag-field span-2 combo-field">
             <label>Novo funcionário *</label>
-            <select formControlName="funcionarioNovoId">
-              <option value="">Selecione</option>
-              @for (funcionario of funcionariosDisponiveis(funcionarioParaSubstituir.funcionarioId); track funcionario.id) {
-                <option [value]="funcionario.id">{{ funcionario.nome }}</option>
-              }
-            </select>
+            <input type="text" placeholder="Digite para pesquisar" [value]="buscaSubstituicaoFuncionario" (focus)="abrirListaSubstituicao()" (input)="alterarBuscaSubstituicao($event)" (blur)="fecharListaSubstituicaoComDelay()" autocomplete="off" />
+            @if (substituicaoListaAberta) {
+              <div class="combo-list">
+                @for (funcionario of funcionariosFiltradosParaSubstituicao(); track funcionario.id) {
+                  <button type="button" class="combo-option" (mousedown)="selecionarFuncionarioSubstituicao(funcionario); $event.preventDefault()">{{ funcionario.nome }}</button>
+                }
+                @if (funcionariosFiltradosParaSubstituicao().length === 0) {
+                  <div class="combo-empty">Nenhum funcionário disponível.</div>
+                }
+              </div>
+            }
             @if (substituicaoForm.controls.funcionarioNovoId.invalid && (substituicaoForm.controls.funcionarioNovoId.dirty || substituicaoForm.controls.funcionarioNovoId.touched)) {
               <small class="field-error">Selecione o novo funcionário.</small>
             }

@@ -22,16 +22,12 @@ AntonioNetoOl/tag-gestao-seguranca-api
 
 ## Status atual
 
-A base funcional do frontend foi implementada na branch:
+A base funcional do frontend foi implementada de forma incremental nas branches de autenticação, cadastros e operação.
+
+A etapa atual de operação está na branch:
 
 ```text
-feature/frontend-auth-dashboard
-```
-
-A etapa de cadastros está em desenvolvimento na branch:
-
-```text
-feature/cadastros-frontend
+feature/operacao-escala-evento
 ```
 
 Ela contém:
@@ -47,7 +43,15 @@ Ela contém:
 - cadastro de funcionários com listagem, filtros, paginação, modal, máscaras e ações de ativar/inativar;
 - seleção de função no cadastro de funcionário;
 - cadastro rápido de função pelo botão `+` ao lado do campo Função;
-- cadastro de casas com listagem, busca, paginação, modal, máscara de CEP e exclusão protegida por confirmação.
+- cadastro de casas com listagem, busca, paginação, modal, máscara de CEP e exclusão protegida por confirmação;
+- cadastro de tipos de evento;
+- tela operacional de eventos;
+- criação e edição de eventos em rascunho;
+- bloqueio de edição para eventos com escala finalizada;
+- montagem de escala por evento;
+- finalização e cancelamento de finalização da escala;
+- substituição e remoção de funcionários da escala;
+- emissão da escala em Excel/PDF por evento.
 
 ## Pré-requisitos
 
@@ -56,6 +60,7 @@ Ela contém:
 - PostgreSQL local ativo.
 - Usuário master configurado no backend.
 - Tabela `funcoes_funcionario` criada no backend para alimentar o campo Função.
+- Migration `20260624120000_AddEventoFuncionarioHistorico` aplicada para auditoria da escala.
 
 ## Como executar localmente
 
@@ -115,6 +120,37 @@ DELETE /api/casas/{id}
 
 A exclusão é validada no backend e não é permitida quando a casa possui eventos vinculados.
 
+## Integração com eventos e escala
+
+A tela Eventos consome a listagem operacional:
+
+```text
+GET /api/eventos?apenasOperacao=true
+```
+
+A tela de escala do evento consome:
+
+```text
+GET    /api/eventos/{id}
+GET    /api/eventos/{eventoId}/funcionarios
+POST   /api/eventos/{eventoId}/funcionarios
+POST   /api/eventos/{eventoId}/funcionarios/finalizar
+POST   /api/eventos/{eventoId}/funcionarios/cancelar-finalizacao
+DELETE /api/eventos/{eventoId}/funcionarios/{funcionarioId}
+POST   /api/eventos/{eventoId}/funcionarios/substituir
+GET    /api/eventos/{id}/escala/excel
+GET    /api/eventos/{id}/escala/pdf
+```
+
+Regras visuais principais:
+
+- eventos em `Rascunho` podem ser editados e receber funcionários;
+- eventos `Escalado` não podem ser editados pela tela de eventos;
+- para editar evento `Escalado`, o usuário deve abrir a escala e cancelar a finalização;
+- eventos `Finalizado` não podem ser editados cadastralmente;
+- a coluna Data/Horário mostra data inicial e final quando o evento cruza a meia-noite;
+- erros devem aparecer em popup, não em faixa fixa na tela.
+
 ## Estrutura principal
 
 ```text
@@ -128,8 +164,10 @@ src/
 │       ├── auth
 │       ├── dashboard
 │       ├── casas
+│       ├── eventos
 │       ├── funcionarios
-│       └── funcoes-funcionario
+│       ├── funcoes-funcionario
+│       └── tipos-evento
 ├── environments
 ├── index.html
 ├── main.ts

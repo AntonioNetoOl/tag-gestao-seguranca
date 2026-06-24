@@ -3,29 +3,26 @@
     <div>
       <span class="eyebrow">Operação</span>
       <h2>Eventos</h2>
-      <p>Cadastre eventos e acompanhe a preparação da escala operacional.</p>
+      <p>Eventos em preparação, escalados ou finalizados dentro da janela de ajuste operacional.</p>
     </div>
     <button type="button" class="tag-button tag-button-primary" (click)="abrirNovo()">Novo evento</button>
   </div>
 
-  @if (erro) { <div class="tag-alert tag-alert-error">{{ erro }}</div> }
-
   <div class="filters tag-card">
     <div class="tag-field search-field"><label>Busca</label><input type="search" placeholder="Nome do evento" [value]="nome" (input)="alterarNome($event)" (keyup.enter)="pesquisar()" /></div>
     <div class="tag-field"><label>Casa</label><select [value]="casaId" (change)="alterarCasa($event)"><option value="">Todas</option>@for (casa of casas; track casa.id) { <option [value]="casa.id">{{ casa.nome }}</option> }</select></div>
-    <div class="tag-field"><label>Status</label><select [value]="status" (change)="alterarStatus($event)"><option value="todos">Todos</option>@for (opcao of statusOptions; track opcao) { <option [value]="opcao">{{ opcao }}</option> }</select></div>
     <div class="tag-field"><label>Data inicial</label><input type="date" [value]="dataInicio" (input)="alterarDataInicio($event)" /></div>
     <div class="tag-field"><label>Data final</label><input type="date" [value]="dataFim" (input)="alterarDataFim($event)" /></div>
     <div class="filter-actions"><button class="tag-button tag-button-secondary" type="button" (click)="limparFiltros()">Limpar</button><button class="tag-button tag-button-primary" type="button" (click)="pesquisar()">Pesquisar</button></div>
   </div>
 
   <div class="table-card tag-card">
-    <div class="table-toolbar"><div><span class="card-kicker">Listagem</span><strong>{{ resultado.totalItems }} evento(s)</strong></div></div>
+    <div class="table-toolbar"><div><span class="card-kicker">Operação</span><strong>{{ resultado.totalItems }} evento(s)</strong></div></div>
 
     @if (carregando) {
       <div class="state-box">Carregando eventos...</div>
     } @else if (resultado.items.length === 0) {
-      <div class="state-box empty"><strong>Nenhum evento encontrado.</strong><span>Altere os filtros ou cadastre um novo evento.</span></div>
+      <div class="state-box empty"><strong>Nenhum evento operacional encontrado.</strong><span>Cadastre um novo evento ou altere os filtros.</span></div>
     } @else {
       <div class="table-scroll">
         <table>
@@ -34,12 +31,12 @@
             @for (evento of resultado.items; track evento.id) {
               <tr>
                 <td><strong>{{ evento.nome }}</strong><small>{{ evento.tipoEventoNome }}</small></td>
-                <td><span>{{ formatarData(evento.dataEvento) }}</span><small>{{ formatarHorario(evento.horaInicio) }} - {{ formatarHorario(evento.horaFim) }}</small></td>
+                <td><span>{{ formatarPeriodoEvento(evento) }}</span><small>{{ formatarHorario(evento.horaInicio) }} - {{ formatarHorario(evento.horaFim) }}</small></td>
                 <td><span>{{ evento.casaNome }}</span></td>
                 <td><span>{{ formatarMoeda(evento.valorDiaria) }}</span><small>Hora extra: {{ formatarMoeda(evento.valorHoraExtra) }}</small></td>
                 <td><span class="tag-badge status-badge {{ classeStatus(evento.status) }}">{{ evento.status }}</span></td>
                 <td><span>{{ evento.quantidadeFuncionarios }}</span></td>
-                <td><div class="row-actions"><button class="icon-button action-icon-button" type="button" aria-label="Editar evento" title="Editar evento" (click)="abrirEdicao(evento)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20Z"></path><path d="M13.5 6 18 10.5"></path></svg></button>@if (podeCancelar(evento)) { <button class="icon-button action-icon-button danger" type="button" aria-label="Cancelar evento" title="Cancelar evento" (click)="cancelar(evento)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M8.5 8.5 15.5 15.5"></path><path d="M15.5 8.5 8.5 15.5"></path></svg></button> }</div></td>
+                <td><div class="row-actions"><a class="icon-button action-icon-button" aria-label="Abrir escala" title="Abrir escala" [href]="'/eventos/' + evento.id"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 1 0-8 0"></path><path d="M5 20a7 7 0 0 1 14 0"></path><path d="M19 8h3"></path><path d="M20.5 6.5v3"></path></svg></a><button class="icon-button action-icon-button" type="button" aria-label="Editar evento" title="Editar evento" (click)="abrirEdicao(evento)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20Z"></path><path d="M13.5 6 18 10.5"></path></svg></button>@if (podeExcluir(evento)) { <button class="icon-button action-icon-button danger" type="button" aria-label="Excluir evento" title="Excluir evento" (click)="excluir(evento)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14"></path><path d="M9 7V5h6v2"></path><path d="M8 7l1 13h6l1-13"></path></svg></button> }</div></td>
               </tr>
             }
           </tbody>
@@ -59,11 +56,11 @@
           <div class="tag-field span-2"><label>Nome do evento *</label><input formControlName="nome" placeholder="Ex.: Casamento Silva" />@if (campoInvalido('nome')) { <small class="field-error">Informe o nome do evento.</small> }</div>
           <div class="tag-field"><label>Casa *</label><select formControlName="casaId"><option value="">Selecione</option>@for (casa of casas; track casa.id) { <option [value]="casa.id">{{ casa.nome }}</option> }</select>@if (campoInvalido('casaId')) { <small class="field-error">Selecione a casa.</small> }</div>
           <div class="tag-field"><label>Tipo de evento *</label><select formControlName="tipoEventoId"><option value="">Selecione</option>@for (tipo of tiposEvento; track tipo.id) { <option [value]="tipo.id">{{ tipo.nome }}</option> }</select>@if (campoInvalido('tipoEventoId')) { <small class="field-error">Selecione o tipo de evento.</small> }</div>
-          <div class="tag-field"><label>Data *</label><input type="date" formControlName="dataEvento" />@if (campoInvalido('dataEvento')) { <small class="field-error">Informe a data.</small> }</div>
+          <div class="tag-field"><label>Data *</label><input type="date" formControlName="dataEvento" [min]="dataMinimaEvento" />@if (campoInvalido('dataEvento')) { <small class="field-error">{{ mensagemErroDataEvento() }}</small> }</div>
           <div class="tag-field"><label>Hora início *</label><input type="time" formControlName="horaInicio" />@if (campoInvalido('horaInicio')) { <small class="field-error">Informe a hora inicial.</small> }</div>
           <div class="tag-field"><label>Hora fim *</label><input type="time" formControlName="horaFim" />@if (campoInvalido('horaFim')) { <small class="field-error">Informe a hora final.</small> }</div>
-          <div class="tag-field"><label>Valor diária *</label><input type="number" min="0.01" step="0.01" formControlName="valorDiaria" />@if (campoInvalido('valorDiaria')) { <small class="field-error">Informe valor maior que zero.</small> }</div>
-          <div class="tag-field"><label>Valor hora extra *</label><input type="number" min="0" step="0.01" formControlName="valorHoraExtra" />@if (campoInvalido('valorHoraExtra')) { <small class="field-error">Informe valor válido.</small> }</div>
+          <div class="tag-field"><label>Valor diária *</label><input type="text" inputmode="numeric" autocomplete="off" formControlName="valorDiaria" (keydown)="aoDigitarMoeda('valorDiaria', $event)" (paste)="aoColarMoeda('valorDiaria', $event)" (focus)="selecionarCampoMoeda($event)" />@if (campoInvalido('valorDiaria')) { <small class="field-error">Informe valor maior que zero.</small> }</div>
+          <div class="tag-field"><label>Valor hora extra *</label><input type="text" inputmode="numeric" autocomplete="off" formControlName="valorHoraExtra" (keydown)="aoDigitarMoeda('valorHoraExtra', $event)" (paste)="aoColarMoeda('valorHoraExtra', $event)" (focus)="selecionarCampoMoeda($event)" />@if (campoInvalido('valorHoraExtra')) { <small class="field-error">Informe valor válido.</small> }</div>
         </div>
         <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharModal()" [disabled]="salvando">Cancelar</button><button type="submit" class="tag-button tag-button-primary" [disabled]="salvando || carregandoOpcoes">{{ salvando ? 'Salvando...' : 'Salvar evento' }}</button></footer>
       </form>

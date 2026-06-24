@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 import { obterMensagemErroApi } from '../../core/api/api-error.util';
 import { PagedResponse } from '../../core/models/paged-response.model';
@@ -7,11 +7,12 @@ import { CasaOpcao } from '../casas/casas.models';
 import { CasasService } from '../casas/casas.service';
 import { TipoEventoOpcao } from '../tipos-evento/tipos-evento.models';
 import { TiposEventoService } from '../tipos-evento/tipos-evento.service';
-import { Evento, EventoRequest, EventoStatus, EventoStatusFiltro } from './eventos.models';
+import { Evento, EventoRequest, EventoStatus } from './eventos.models';
 import { EventosService } from './eventos.service';
 
 type ModoFormulario = 'criar' | 'editar';
 type CampoFormulario = 'casaId' | 'tipoEventoId' | 'nome' | 'dataEvento' | 'horaInicio' | 'horaFim' | 'valorDiaria' | 'valorHoraExtra';
+type CampoMoeda = 'valorDiaria' | 'valorHoraExtra';
 type AvisoTipo = 'pergunta' | 'erro' | 'sucesso';
 
 interface AvisoState {
@@ -37,6 +38,10 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   private readonly tiposEventoService = inject(TiposEventoService);
   private readonly formBuilder = inject(FormBuilder);
   private avisoTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private valoresMoeda: Record<CampoMoeda, number> = {
+    valorDiaria: 0,
+    valorHoraExtra: 0
+  };
 
   carregando = true;
   carregandoOpcoes = true;
@@ -56,9 +61,8 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   casaId = '';
   dataInicio = '';
   dataFim = '';
-  status: EventoStatusFiltro = 'todos';
   readonly pageSizeOptions = [5, 10, 15, 20];
-  readonly statusOptions: EventoStatus[] = ['Rascunho', 'Escalado', 'Finalizado', 'Cancelado'];
+  readonly dataMinimaEvento = this.obterDataHojeInput();
 
   resultado: PagedResponse<Evento> = { items: [], page: 1, pageSize: 5, totalItems: 0, totalPages: 0 };
 
@@ -66,11 +70,11 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     casaId: ['', [Validators.required]],
     tipoEventoId: ['', [Validators.required]],
     nome: ['', [Validators.required, Validators.maxLength(200)]],
-    dataEvento: ['', [Validators.required]],
+    dataEvento: ['', [Validators.required, this.dataEventoMinimaHoje()]],
     horaInicio: ['', [Validators.required]],
     horaFim: ['', [Validators.required]],
-    valorDiaria: [0, [Validators.required, Validators.min(0.01)]],
-    valorHoraExtra: [0, [Validators.required, Validators.min(0)]]
+    valorDiaria: [this.formatarMoedaInput(0), [Validators.required, this.valorMonetarioMinimo(0.01)]],
+    valorHoraExtra: [this.formatarMoedaInput(0), [Validators.required, this.valorMonetarioMinimo(0)]]
   });
 
   ngOnInit(): void {
@@ -110,7 +114,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       casaId: this.casaId || undefined,
       dataInicio: this.dataInicio || undefined,
       dataFim: this.dataFim || undefined,
-      status: this.status === 'todos' ? undefined : this.status,
+      apenasOperacao: true,
       page: this.page,
       pageSize: this.pageSize
     }).subscribe({
@@ -121,8 +125,9 @@ export class EventosPageComponent implements OnInit, OnDestroy {
         this.carregando = false;
       },
       error: (error: unknown) => {
-        this.erro = obterMensagemErroApi(error);
+        const mensagem = obterMensagemErroApi(error);
         this.carregando = false;
+        this.abrirErro('Não foi possível carregar os eventos', mensagem);
       }
     });
   }
@@ -137,7 +142,6 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     this.casaId = '';
     this.dataInicio = '';
     this.dataFim = '';
-    this.status = 'todos';
     this.page = 1;
     this.carregarEventos();
   }
@@ -146,7 +150,6 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   alterarCasa(event: Event): void { this.casaId = (event.target as HTMLSelectElement).value; this.pesquisar(); }
   alterarDataInicio(event: Event): void { this.dataInicio = (event.target as HTMLInputElement).value; }
   alterarDataFim(event: Event): void { this.dataFim = (event.target as HTMLInputElement).value; }
-  alterarStatus(event: Event): void { this.status = (event.target as HTMLSelectElement).value as EventoStatusFiltro; this.pesquisar(); }
   alterarPageSize(event: Event): void { this.pageSize = this.normalizarPageSize(Number((event.target as HTMLSelectElement).value)); this.page = 1; this.carregarEventos(); }
   paginaAnterior(): void { if (this.page <= 1) return; this.page--; this.carregarEventos(); }
   proximaPagina(): void { if (this.page >= this.resultado.totalPages) return; this.page++; this.carregarEventos(); }
@@ -155,14 +158,41 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     this.modoFormulario = 'criar';
     this.eventoSelecionado = null;
     this.erro = '';
-    this.form.reset({ casaId: '', tipoEventoId: '', nome: '', dataEvento: '', horaInicio: '', horaFim: '', valorDiaria: 0, valorHoraExtra: 0 });
+    this.definirMoeda('valorDiaria', 0);
+    this.definirMoeda('valorHoraExtra', 0);
+    this.form.reset({
+      casaId: '',
+      tipoEventoId: '',
+      nome: '',
+      dataEvento: '',
+      horaInicio: '',
+      horaFim: '',
+      valorDiaria: this.formatarMoedaInput(0),
+      valorHoraExtra: this.formatarMoedaInput(0)
+    });
     this.modalAberto = true;
   }
 
   abrirEdicao(evento: Evento): void {
+    if (evento.status === 'Escalado') {
+      this.abrirErro(
+        'Alteração bloqueada',
+        'Não é possível alterar este evento porque a escala já foi finalizada.',
+        'Para editar os dados do evento, primeiro abra a escala e clique em Cancelar finalização.'
+      );
+      return;
+    }
+
+    if (evento.status === 'Finalizado') {
+      this.abrirErro('Alteração bloqueada', 'Evento finalizado não pode ser alterado.');
+      return;
+    }
+
     this.modoFormulario = 'editar';
     this.eventoSelecionado = evento;
     this.erro = '';
+    this.definirMoeda('valorDiaria', evento.valorDiaria);
+    this.definirMoeda('valorHoraExtra', evento.valorHoraExtra);
     this.form.setValue({
       casaId: evento.casaId,
       tipoEventoId: evento.tipoEventoId,
@@ -170,8 +200,8 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       dataEvento: this.formatarDataInput(evento.dataEvento),
       horaInicio: this.formatarHorarioInput(evento.horaInicio),
       horaFim: this.formatarHorarioInput(evento.horaFim),
-      valorDiaria: evento.valorDiaria,
-      valorHoraExtra: evento.valorHoraExtra
+      valorDiaria: this.formatarMoedaInput(evento.valorDiaria),
+      valorHoraExtra: this.formatarMoedaInput(evento.valorHoraExtra)
     });
     this.modalAberto = true;
   }
@@ -188,6 +218,12 @@ export class EventosPageComponent implements OnInit, OnDestroy {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+
+      if (this.form.controls.dataEvento.hasError('dataPassada')) {
+        this.abrirErro('Data inválida', `A data do evento não pode ser anterior a hoje (${this.formatarDataInputPtBr(this.dataMinimaEvento)}).`);
+        return;
+      }
+
       this.abrirErro('Revise o cadastro', 'Existem campos obrigatórios ou inválidos no formulário.', 'Confira casa, tipo, data, horários e valores antes de salvar.');
       return;
     }
@@ -222,16 +258,55 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  cancelar(evento: Evento): void {
+  excluir(evento: Evento): void {
     this.abrirConfirmacao({
       tipo: 'pergunta',
-      titulo: 'Confirmar cancelamento',
-      mensagem: `Cancelar o evento ${evento.nome}?`,
-      detalhe: 'O evento não será removido do histórico. O status será alterado para Cancelado.',
-      textoPrincipal: 'Cancelar evento',
+      titulo: 'Confirmar exclusão',
+      mensagem: `Excluir o evento ${evento.nome}?`,
+      detalhe: 'O evento será marcado como Cancelado e sairá da listagem operacional.',
+      textoPrincipal: 'Excluir evento',
       textoSecundario: 'Voltar',
-      aoConfirmar: () => this.executarCancelamento(evento)
+      aoConfirmar: () => this.executarExclusao(evento)
     });
+  }
+
+  aoDigitarMoeda(campo: CampoMoeda, event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+    const teclasPermitidas = ['Tab', 'Enter', 'Escape', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    if (teclasPermitidas.includes(event.key)) return;
+
+    const input = event.target as HTMLInputElement;
+    const tudoSelecionado = input.selectionStart === 0 && input.selectionEnd === input.value.length;
+
+    if (/^\d$/.test(event.key)) {
+      event.preventDefault();
+      const valorBase = tudoSelecionado ? 0 : this.valoresMoeda[campo];
+      const novoValor = Math.trunc(valorBase * 10) + Number(event.key);
+      this.definirMoeda(campo, novoValor, input);
+      return;
+    }
+
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      event.preventDefault();
+      const novoValor = tudoSelecionado ? 0 : Math.trunc(this.valoresMoeda[campo] / 10);
+      this.definirMoeda(campo, novoValor, input);
+      return;
+    }
+
+    event.preventDefault();
+  }
+
+  aoColarMoeda(campo: CampoMoeda, event: ClipboardEvent): void {
+    event.preventDefault();
+    const texto = event.clipboardData?.getData('text') ?? '';
+    const valor = this.converterTextoMoedaParaNumero(texto);
+    this.definirMoeda(campo, valor, event.target as HTMLInputElement);
+  }
+
+  selecionarCampoMoeda(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    setTimeout(() => input.select());
   }
 
   confirmarAviso(): void { const acao = this.aviso?.aoConfirmar; this.fecharAviso(); acao?.(); }
@@ -242,15 +317,38 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return controle.invalid && (controle.dirty || controle.touched);
   }
 
-  podeCancelar(evento: Evento): boolean {
+  mensagemErroDataEvento(): string {
+    const controle = this.form.controls.dataEvento;
+    if (controle.hasError('dataPassada')) return `A data não pode ser anterior a hoje (${this.formatarDataInputPtBr(this.dataMinimaEvento)}).`;
+    return 'Informe a data.';
+  }
+
+  podeExcluir(evento: Evento): boolean {
     return evento.status !== 'Cancelado' && evento.status !== 'Finalizado';
   }
 
+  formatarPeriodoEvento(evento: Evento): string {
+    const dataInicio = this.extrairDataUtc(evento.dataEvento);
+    if (!dataInicio) return this.formatarData(evento.dataEvento);
+
+    const inicio = this.formatarHorario(evento.horaInicio);
+    const fim = this.formatarHorario(evento.horaFim);
+    const terminaNoDiaSeguinte = inicio !== '-' && fim !== '-' && fim < inicio;
+
+    if (!terminaNoDiaSeguinte) {
+      return this.formatarData(evento.dataEvento);
+    }
+
+    const dataFim = new Date(dataInicio);
+    dataFim.setUTCDate(dataFim.getUTCDate() + 1);
+
+    return `${this.formatarDataPorDate(dataInicio)} - ${this.formatarDataPorDate(dataFim)}`;
+  }
+
   formatarData(valor: string): string {
-    if (!valor) return '-';
-    const data = new Date(valor);
-    if (Number.isNaN(data.getTime())) return valor;
-    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(data);
+    const data = this.extrairDataUtc(valor);
+    if (!data) return valor || '-';
+    return this.formatarDataPorDate(data);
   }
 
   formatarHorario(valor: string): string {
@@ -258,7 +356,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   }
 
   formatarMoeda(valor: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0);
+    return this.formatarMoedaInput(valor);
   }
 
   classeStatus(status: EventoStatus): string {
@@ -271,17 +369,17 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return mapa[status] ?? 'tag-badge-neutral';
   }
 
-  private executarCancelamento(evento: Evento): void {
+  private executarExclusao(evento: Evento): void {
     this.erro = '';
     this.eventosService.cancelar(evento.id).subscribe({
       next: () => {
-        this.abrirSucesso('Evento cancelado', 'Evento cancelado com sucesso.');
+        this.abrirSucesso('Evento excluído', 'Evento removido da listagem operacional.');
         this.carregarEventos();
       },
       error: (error: unknown) => {
         const mensagem = obterMensagemErroApi(error);
         this.erro = mensagem;
-        this.abrirErro('Não foi possível cancelar', mensagem);
+        this.abrirErro('Não foi possível excluir', mensagem);
       }
     });
   }
@@ -302,13 +400,19 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       dataEvento: `${raw.dataEvento}T00:00:00`,
       horaInicio: this.normalizarHorario(raw.horaInicio),
       horaFim: this.normalizarHorario(raw.horaFim),
-      valorDiaria: Number(raw.valorDiaria),
-      valorHoraExtra: Number(raw.valorHoraExtra)
+      valorDiaria: this.converterTextoMoedaParaNumero(raw.valorDiaria),
+      valorHoraExtra: this.converterTextoMoedaParaNumero(raw.valorHoraExtra)
     };
   }
 
   private formatarDataInput(valor: string): string {
     return String(valor ?? '').slice(0, 10);
+  }
+
+  private formatarDataInputPtBr(valor: string): string {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return valor;
+    const [ano, mes, dia] = valor.split('-');
+    return `${dia}/${mes}/${ano}`;
   }
 
   private formatarHorarioInput(valor: string): string {
@@ -317,6 +421,75 @@ export class EventosPageComponent implements OnInit, OnDestroy {
 
   private normalizarHorario(valor: string): string {
     return valor.length === 5 ? `${valor}:00` : valor;
+  }
+
+  private obterDataHojeInput(): string {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  private definirMoeda(campo: CampoMoeda, valor: number, input?: HTMLInputElement): void {
+    const valorNormalizado = Number.isFinite(valor) && valor > 0 ? valor : 0;
+    this.valoresMoeda[campo] = valorNormalizado;
+    const controle = this.form.controls[campo];
+    controle.setValue(this.formatarMoedaInput(valorNormalizado), { emitEvent: false });
+    controle.updateValueAndValidity({ emitEvent: false });
+
+    if (input) {
+      controle.markAsDirty();
+      setTimeout(() => input.setSelectionRange(input.value.length, input.value.length));
+    }
+  }
+
+  private formatarMoedaInput(valor: number): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
+  }
+
+  private converterTextoMoedaParaNumero(valor: string): number {
+    const texto = String(valor ?? '').trim();
+    if (!texto) return 0;
+
+    const limpo = texto.replace(/[^\d,.-]/g, '');
+    if (!limpo) return 0;
+
+    if (limpo.includes(',')) {
+      const normalizado = limpo.replace(/\./g, '').replace(',', '.');
+      const numero = Number(normalizado);
+      return Number.isFinite(numero) ? numero : 0;
+    }
+
+    const numero = Number(limpo.replace(/\./g, ''));
+    return Number.isFinite(numero) ? numero : 0;
+  }
+
+  private valorMonetarioMinimo(minimo: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const valor = this.converterTextoMoedaParaNumero(control.value);
+      return valor >= minimo ? null : { valorMonetarioMinimo: true };
+    };
+  }
+
+  private dataEventoMinimaHoje(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const valor = String(control.value ?? '');
+      if (!valor) return null;
+      return valor >= this.dataMinimaEvento ? null : { dataPassada: true };
+    };
+  }
+
+  private extrairDataUtc(valor: string): Date | null {
+    const texto = String(valor ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return null;
+
+    const [ano, mes, dia] = texto.split('-').map(Number);
+    return new Date(Date.UTC(ano, mes - 1, dia));
+  }
+
+  private formatarDataPorDate(data: Date): string {
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(data);
   }
 
   private abrirConfirmacao(aviso: AvisoState): void { this.limparTimerAviso(); this.aviso = aviso; }

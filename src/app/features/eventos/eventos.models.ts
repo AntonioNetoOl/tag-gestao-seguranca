@@ -36,6 +36,36 @@ export interface EventoListagemParams {
   dataFim?: string;
   nome?: string;
   status?: EventoStatus;
+  apenasOperacao?: boolean;
   page: number;
   pageSize: number;
+}
+
+export interface EventoFuncionario {
+  id: string;
+  eventoId: string;
+  funcionarioId: string;
+  nomeCompleto: string;
+  rg: string;
+  cpf: string;
+  funcao: string;
+  pago: boolean;
+  removido: boolean;
+  motivoRemocao: string | null;
+  dataCriacao: string;
+  dataAlteracao: string | null;
+}
+
+export interface EventoFuncionarioRequest {
+  funcionarioId: string;
+}
+
+export interface RemoverFuncionarioEventoRequest {
+  motivoRemocao: string | null;
+}
+
+export interface SubstituirFuncionarioEventoRequest {
+  funcionarioAntigoId: string;
+  funcionarioNovoId: string;
+  motivo: string | null;
 }

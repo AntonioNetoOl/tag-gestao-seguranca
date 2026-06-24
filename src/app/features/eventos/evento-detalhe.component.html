@@ -50,9 +50,14 @@
         <span class="card-kicker">Escala</span>
         <strong>Funcionários vinculados ao evento</strong>
       </div>
-      @if (escalaBloqueada()) {
-        <span class="tag-badge tag-badge-danger">Escala bloqueada</span>
-      }
+      <div class="toolbar-actions">
+        @if (escalaBloqueada()) {
+          <span class="tag-badge tag-badge-danger">Escala bloqueada</span>
+        }
+        <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeEmitirEscala()" (click)="emitirEscalaExcel()">Emitir Excel</button>
+        <button type="button" class="tag-button tag-button-secondary" [disabled]="!podeEmitirEscala()" (click)="emitirEscalaPdf()">Emitir PDF</button>
+        <button type="button" class="tag-button tag-button-primary" [disabled]="!podeFinalizarEscala()" (click)="finalizarEscala()">Finalizar escala</button>
+      </div>
     </div>
 
     <form class="adicionar-escala" [formGroup]="adicionarForm" (ngSubmit)="adicionarFuncionario()">
@@ -69,6 +74,10 @@
         Adicionar à escala
       </button>
     </form>
+
+    @if (evento?.status === 'Rascunho' && escala.length > 0) {
+      <div class="operation-note">A escala ainda está em rascunho. Clique em <strong>Finalizar escala</strong> para marcar o evento como Escalado e liberar emissão da escala.</div>
+    }
 
     @if (carregandoEscala) {
       <div class="state-box">Carregando escala...</div>
@@ -122,18 +131,11 @@
   <div class="tag-modal-backdrop">
     <section class="tag-modal acao-modal">
       <header class="tag-modal-header"><div><span class="card-kicker">Remover da escala</span><h2>{{ funcionarioParaRemover.nomeCompleto }}</h2></div><button type="button" class="modal-close" (click)="fecharRemocao()">×</button></header>
-      <form [formGroup]="remocaoForm" (ngSubmit)="removerFuncionario()">
-        <div class="tag-modal-body form-grid">
-          <div class="tag-field span-2">
-            <label>Motivo da remoção *</label>
-            <textarea formControlName="motivoRemocao" rows="4" placeholder="Ex.: Não compareceu, lançamento incorreto, ajuste operacional"></textarea>
-            @if (remocaoForm.controls.motivoRemocao.invalid && (remocaoForm.controls.motivoRemocao.dirty || remocaoForm.controls.motivoRemocao.touched)) {
-              <small class="field-error">Informe o motivo da remoção.</small>
-            }
-          </div>
-        </div>
-        <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharRemocao()" [disabled]="processando">Cancelar</button><button type="submit" class="tag-button tag-button-primary" [disabled]="processando">{{ processando ? 'Removendo...' : 'Remover funcionário' }}</button></footer>
-      </form>
+      <div class="tag-modal-body">
+        <p>Deseja realmente remover este funcionário da escala?</p>
+        <small>Use substituição quando outro funcionário entrou no lugar dele. Para erro de lançamento ou desistência antes do evento, a remoção simples é suficiente.</small>
+      </div>
+      <footer class="tag-modal-footer"><button type="button" class="tag-button tag-button-secondary" (click)="fecharRemocao()" [disabled]="processando">Cancelar</button><button type="button" class="tag-button tag-button-primary" (click)="removerFuncionario()" [disabled]="processando">{{ processando ? 'Removendo...' : 'Remover funcionário' }}</button></footer>
     </section>
   </div>
 }

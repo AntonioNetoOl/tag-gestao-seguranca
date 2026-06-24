@@ -36,6 +36,7 @@ export interface EventoListagemParams {
   dataFim?: string;
   nome?: string;
   status?: EventoStatus;
+  apenasOperacao?: boolean;
   page: number;
   pageSize: number;
 }

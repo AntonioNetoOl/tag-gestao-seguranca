@@ -56,6 +56,7 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
   modalSubstituicaoAberto = false;
   funcionarioParaSubstituir: EventoFuncionario | null = null;
   modalRelatorioAberto = false;
+  modalFinalizacaoEscalaAberto = false;
   modalCancelamentoFinalizacaoAberto = false;
   relatorioSucesso = false;
 
@@ -166,6 +167,25 @@ export class EventoDetalheComponent implements OnInit, OnDestroy {
         this.abrirErro('Não foi possível adicionar', obterMensagemErroApi(error));
       }
     });
+  }
+
+  abrirConfirmacaoFinalizacaoEscala(): void {
+    if (!this.podeFinalizarEscala()) {
+      this.abrirErro('Não foi possível finalizar', 'Adicione pelo menos um funcionário antes de finalizar a escala.');
+      return;
+    }
+
+    this.modalFinalizacaoEscalaAberto = true;
+  }
+
+  fecharConfirmacaoFinalizacaoEscala(): void {
+    if (this.processando) return;
+    this.modalFinalizacaoEscalaAberto = false;
+  }
+
+  confirmarFinalizacaoEscala(): void {
+    this.modalFinalizacaoEscalaAberto = false;
+    this.finalizarEscala();
   }
 
   finalizarEscala(): void {

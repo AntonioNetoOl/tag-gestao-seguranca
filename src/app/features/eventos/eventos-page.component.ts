@@ -7,7 +7,7 @@ import { CasaOpcao } from '../casas/casas.models';
 import { CasasService } from '../casas/casas.service';
 import { TipoEventoOpcao } from '../tipos-evento/tipos-evento.models';
 import { TiposEventoService } from '../tipos-evento/tipos-evento.service';
-import { Evento, EventoRequest, EventoStatus, EventoStatusFiltro } from './eventos.models';
+import { Evento, EventoRequest, EventoStatus } from './eventos.models';
 import { EventosService } from './eventos.service';
 
 type ModoFormulario = 'criar' | 'editar';
@@ -56,9 +56,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   casaId = '';
   dataInicio = '';
   dataFim = '';
-  status: EventoStatusFiltro = 'todos';
   readonly pageSizeOptions = [5, 10, 15, 20];
-  readonly statusOptions: EventoStatus[] = ['Rascunho', 'Escalado', 'Finalizado', 'Cancelado'];
 
   resultado: PagedResponse<Evento> = { items: [], page: 1, pageSize: 5, totalItems: 0, totalPages: 0 };
 
@@ -110,7 +108,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       casaId: this.casaId || undefined,
       dataInicio: this.dataInicio || undefined,
       dataFim: this.dataFim || undefined,
-      status: this.status === 'todos' ? undefined : this.status,
+      apenasOperacao: true,
       page: this.page,
       pageSize: this.pageSize
     }).subscribe({
@@ -137,7 +135,6 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     this.casaId = '';
     this.dataInicio = '';
     this.dataFim = '';
-    this.status = 'todos';
     this.page = 1;
     this.carregarEventos();
   }
@@ -146,7 +143,6 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   alterarCasa(event: Event): void { this.casaId = (event.target as HTMLSelectElement).value; this.pesquisar(); }
   alterarDataInicio(event: Event): void { this.dataInicio = (event.target as HTMLInputElement).value; }
   alterarDataFim(event: Event): void { this.dataFim = (event.target as HTMLInputElement).value; }
-  alterarStatus(event: Event): void { this.status = (event.target as HTMLSelectElement).value as EventoStatusFiltro; this.pesquisar(); }
   alterarPageSize(event: Event): void { this.pageSize = this.normalizarPageSize(Number((event.target as HTMLSelectElement).value)); this.page = 1; this.carregarEventos(); }
   paginaAnterior(): void { if (this.page <= 1) return; this.page--; this.carregarEventos(); }
   proximaPagina(): void { if (this.page >= this.resultado.totalPages) return; this.page++; this.carregarEventos(); }
@@ -222,15 +218,15 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  cancelar(evento: Evento): void {
+  excluir(evento: Evento): void {
     this.abrirConfirmacao({
       tipo: 'pergunta',
-      titulo: 'Confirmar cancelamento',
-      mensagem: `Cancelar o evento ${evento.nome}?`,
-      detalhe: 'O evento não será removido do histórico. O status será alterado para Cancelado.',
-      textoPrincipal: 'Cancelar evento',
+      titulo: 'Confirmar exclusão',
+      mensagem: `Excluir o evento ${evento.nome}?`,
+      detalhe: 'O evento será marcado como Cancelado e sairá da listagem operacional.',
+      textoPrincipal: 'Excluir evento',
       textoSecundario: 'Voltar',
-      aoConfirmar: () => this.executarCancelamento(evento)
+      aoConfirmar: () => this.executarExclusao(evento)
     });
   }
 
@@ -242,7 +238,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return controle.invalid && (controle.dirty || controle.touched);
   }
 
-  podeCancelar(evento: Evento): boolean {
+  podeExcluir(evento: Evento): boolean {
     return evento.status !== 'Cancelado' && evento.status !== 'Finalizado';
   }
 
@@ -271,17 +267,17 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return mapa[status] ?? 'tag-badge-neutral';
   }
 
-  private executarCancelamento(evento: Evento): void {
+  private executarExclusao(evento: Evento): void {
     this.erro = '';
     this.eventosService.cancelar(evento.id).subscribe({
       next: () => {
-        this.abrirSucesso('Evento cancelado', 'Evento cancelado com sucesso.');
+        this.abrirSucesso('Evento excluído', 'Evento removido da listagem operacional.');
         this.carregarEventos();
       },
       error: (error: unknown) => {
         const mensagem = obterMensagemErroApi(error);
         this.erro = mensagem;
-        this.abrirErro('Não foi possível cancelar', mensagem);
+        this.abrirErro('Não foi possível excluir', mensagem);
       }
     });
   }

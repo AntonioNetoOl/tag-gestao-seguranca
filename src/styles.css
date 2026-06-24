@@ -285,38 +285,106 @@ a {
   margin-top: 10px;
 }
 
-.tag-modal.feedback-modal .feedback-layout,
-.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback {
-  align-items: start;
+.tag-modal.feedback-modal .feedback-layout {
   display: grid;
-  grid-template-columns: auto 1fr;
+  gap: 0;
 }
 
-.tag-modal.feedback-modal .feedback-layout > svg,
-.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > svg {
+.tag-modal.feedback-modal .feedback-heading {
+  border-bottom: 1px solid var(--tag-border);
+  padding-bottom: 16px;
+}
+
+.tag-modal.feedback-modal .feedback-content {
+  padding-top: 16px;
+}
+
+.tag-modal.feedback-modal .feedback-actions {
+  padding-top: 18px;
+}
+
+.tag-modal.feedback-modal .feedback-layout > svg {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 1 / span 2;
   height: 64px;
+  margin-right: 16px;
   width: 64px;
 }
 
-.tag-modal.feedback-modal .feedback-layout > div,
-.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > div {
+.tag-modal.feedback-modal .feedback-layout > div:not(.feedback-heading):not(.feedback-content) {
+  display: contents;
+}
+
+.tag-modal.feedback-modal .feedback-layout > div:not(.feedback-heading):not(.feedback-content) > .card-kicker {
   grid-column: 2;
   grid-row: 1;
+  align-self: end;
 }
 
-.tag-modal.feedback-modal .feedback-layout > footer,
-.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > footer {
+.tag-modal.feedback-modal .feedback-layout > div:not(.feedback-heading):not(.feedback-content) > h2 {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 4px 0 0;
+}
+
+.tag-modal.feedback-modal .feedback-layout > div:not(.feedback-heading):not(.feedback-content) > p {
+  border-top: 1px solid var(--tag-border);
+  grid-column: 1 / -1;
+  grid-row: 3;
+  line-height: 1.55;
+  margin: 16px 0 0;
+  padding-top: 16px;
+}
+
+.tag-modal.feedback-modal .feedback-layout > div:not(.feedback-heading):not(.feedback-content) > small {
+  color: var(--tag-muted);
+  display: block;
+  grid-column: 1 / -1;
+  grid-row: 4;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+.tag-modal.feedback-modal .feedback-layout > footer {
   grid-column: 1 / -1;
 }
 
-.tag-modal.feedback-modal .feedback-layout .feedback-heading {
-  grid-column: 1 / -1;
+.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback {
+  display: grid;
+  gap: 0;
 }
 
-.tag-modal.feedback-modal .feedback-layout .feedback-content {
+.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > svg {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  height: 64px;
+  margin-right: 16px;
+  width: 64px;
+}
+
+.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > div {
+  display: contents;
+}
+
+.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > div > .card-kicker {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+
+.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > div > h2 {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 4px 0 0;
+}
+
+.tag-modal.relatorio-modal .feedback-layout.relatorio-feedback > div > p {
+  border-top: 1px solid var(--tag-border);
   grid-column: 1 / -1;
+  grid-row: 3;
+  line-height: 1.55;
+  margin: 16px 0 0;
+  padding-top: 16px;
 }
 
 @media (max-width: 760px) {

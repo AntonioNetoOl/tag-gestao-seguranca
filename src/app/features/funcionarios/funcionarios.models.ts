@@ -24,6 +24,11 @@ export interface FuncionarioRequest {
   funcao: string;
 }
 
+export interface FuncionarioOpcao {
+  id: string;
+  nome: string;
+}
+
 export type FiltroAtivoFuncionario = 'todos' | 'ativos' | 'inativos';
 
 export interface FuncionarioListagemParams {

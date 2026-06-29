@@ -1,4 +1,4 @@
-export type EventoStatus = 'Rascunho' | 'Rascunho em andamento' | 'Rascunho vencido' | 'Escalado' | 'Escalado encerrado' | 'Finalizado' | 'Cancelado';
+export type EventoStatus = 'Rascunho' | 'Escalado' | 'Finalizado' | 'Cancelado';
 export type EventoStatusFiltro = 'todos' | EventoStatus;
 
 export interface Evento {

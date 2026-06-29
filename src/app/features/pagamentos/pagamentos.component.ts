@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { obterMensagemErroApi } from '../../core/api/api-error.util';
@@ -8,7 +8,6 @@ import {
   PagamentoPendenteDetalhe,
   PagamentoPendenteEvento,
   PagamentoPendenteResumo,
-  PagamentoResumo,
   PagamentosAba,
   PagamentosConfirmadosResponse
 } from './pagamentos.models';
@@ -33,8 +32,16 @@ interface AvisoState {
   templateUrl: './pagamentos.component.html',
   styleUrl: './pagamentos.component.css'
 })
-export class PagamentosComponent implements OnInit {
+export class PagamentosComponent implements OnInit, OnDestroy {
   private readonly pagamentosService = inject(PagamentosService);
+  private detalheHistoricoAberto = false;
+  private readonly aoVoltarNavegador = () => {
+    if (this.pagamentoConfirmadoDetalhe || this.detalhePendente) {
+      this.pagamentoConfirmadoDetalhe = null;
+      this.detalhePendente = null;
+      this.detalheHistoricoAberto = false;
+    }
+  };
 
   readonly pageSizeOptions = [5, 10, 20, 50];
 
@@ -65,17 +72,22 @@ export class PagamentosComponent implements OnInit {
   aviso: AvisoState | null = null;
 
   ngOnInit(): void {
+    window.addEventListener('popstate', this.aoVoltarNavegador);
     this.carregarPendentes();
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('popstate', this.aoVoltarNavegador);
   }
 
   selecionarAba(aba: PagamentosAba): void {
     this.abaAtiva = aba;
-    this.detalhePendente = null;
-    this.pagamentoConfirmadoDetalhe = null;
+    this.fecharDetalhesSemNavegarHistorico();
 
     if (aba === 'pendentes') {
       this.carregarPendentes();
     } else {
+      this.garantirPeriodoConfirmadosPadrao();
       this.carregarConfirmados();
     }
   }
@@ -105,6 +117,7 @@ export class PagamentosComponent implements OnInit {
       next: (detalhe) => {
         this.detalhePendente = detalhe;
         this.pagamentoConfirmadoDetalhe = null;
+        this.registrarDetalheNoHistorico();
         this.carregandoDetalhe = false;
       },
       error: (error: unknown) => {
@@ -115,7 +128,7 @@ export class PagamentosComponent implements OnInit {
   }
 
   voltarListaPendentes(): void {
-    this.detalhePendente = null;
+    this.fecharDetalhesSemNavegarHistorico();
   }
 
   atualizarHorasExtras(evento: PagamentoPendenteEvento, valor: string): void {
@@ -169,9 +182,11 @@ export class PagamentosComponent implements OnInit {
     this.pagamentosService.confirmar(request).subscribe({
       next: (pagamento) => {
         this.confirmando = false;
-        this.detalhePendente = null;
+        this.fecharDetalhesSemNavegarHistorico();
         this.pagamentoConfirmadoDetalhe = pagamento;
+        this.registrarDetalheNoHistorico();
         this.abaAtiva = 'confirmados';
+        this.garantirPeriodoConfirmadosPadrao();
         this.carregarConfirmados();
         this.abrirSucesso('Pagamento confirmado', 'O pagamento foi registrado e saiu da lista de pendências.');
       },
@@ -183,6 +198,7 @@ export class PagamentosComponent implements OnInit {
   }
 
   carregarConfirmados(): void {
+    this.garantirPeriodoConfirmadosPadrao();
     this.carregandoConfirmados = true;
     this.pagamentosService.listarConfirmados({
       busca: this.buscaConfirmados,
@@ -204,8 +220,7 @@ export class PagamentosComponent implements OnInit {
 
   limparConfirmados(): void {
     this.buscaConfirmados = '';
-    this.dataInicioConfirmados = '';
-    this.dataFimConfirmados = '';
+    this.aplicarPeriodoUltimosSeteDias();
     this.pageConfirmados = 1;
     this.carregarConfirmados();
   }
@@ -216,6 +231,7 @@ export class PagamentosComponent implements OnInit {
       next: (pagamento) => {
         this.pagamentoConfirmadoDetalhe = pagamento;
         this.detalhePendente = null;
+        this.registrarDetalheNoHistorico();
         this.carregandoDetalhe = false;
       },
       error: (error: unknown) => {
@@ -226,7 +242,7 @@ export class PagamentosComponent implements OnInit {
   }
 
   voltarListaConfirmados(): void {
-    this.pagamentoConfirmadoDetalhe = null;
+    this.fecharDetalhesSemNavegarHistorico();
   }
 
   paginaAnteriorConfirmados(): void {
@@ -292,6 +308,43 @@ export class PagamentosComponent implements OnInit {
 
   formatarRg(rg: string): string {
     return rg || '-';
+  }
+
+  private garantirPeriodoConfirmadosPadrao(): void {
+    if (!this.dataInicioConfirmados && !this.dataFimConfirmados) {
+      this.aplicarPeriodoUltimosSeteDias();
+    }
+  }
+
+  private aplicarPeriodoUltimosSeteDias(): void {
+    const fim = new Date();
+    const inicio = new Date();
+    inicio.setDate(fim.getDate() - 6);
+    this.dataInicioConfirmados = this.formatarDataInput(inicio);
+    this.dataFimConfirmados = this.formatarDataInput(fim);
+  }
+
+  private formatarDataInput(data: Date): string {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  private registrarDetalheNoHistorico(): void {
+    if (this.detalheHistoricoAberto) return;
+    window.history.pushState({ tagPagamentoDetalhe: true }, '', window.location.href);
+    this.detalheHistoricoAberto = true;
+  }
+
+  private fecharDetalhesSemNavegarHistorico(): void {
+    this.detalhePendente = null;
+    this.pagamentoConfirmadoDetalhe = null;
+    this.detalheHistoricoAberto = false;
+
+    if (window.history.state?.tagPagamentoDetalhe) {
+      window.history.replaceState(null, '', window.location.href);
+    }
   }
 
   private abrirErro(titulo: string, mensagem: string, detalhe?: string): void {

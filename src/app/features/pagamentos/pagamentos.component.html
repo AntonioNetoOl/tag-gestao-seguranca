@@ -41,7 +41,6 @@
       <div class="detail-card tag-card">
         <div class="detail-header">
           <div><span class="card-kicker">Pagamento pendente</span><h3>{{ detalhePendente.nomeCompleto }}</h3><p>{{ detalhePendente.funcao }} • RG {{ formatarRg(detalhePendente.rg) }} • CPF {{ formatarCpf(detalhePendente.cpf) }}</p><p>Meio de pagamento: <strong>{{ detalhePendente.meioPagamento }}</strong></p></div>
-          <button type="button" class="tag-button tag-button-secondary" (click)="voltarListaPendentes()">Voltar</button>
         </div>
         <div class="summary-grid">
           <div><span>Eventos</span><strong>{{ detalhePendente.quantidadeEventos }}</strong></div>
@@ -108,9 +107,10 @@
       </div>
     } @else {
       <div class="detail-card tag-card">
-        <div class="detail-header"><div><span class="card-kicker">Pagamento confirmado</span><h3>{{ pagamentoConfirmadoDetalhe.nomeCompleto }}</h3><p>CPF {{ formatarCpf(pagamentoConfirmadoDetalhe.cpf) }} • Pago em {{ formatarDataHora(pagamentoConfirmadoDetalhe.dataPagamento) }}</p><p>Meio de pagamento: <strong>{{ pagamentoConfirmadoDetalhe.meioPagamento }}</strong></p></div><button type="button" class="tag-button tag-button-secondary" (click)="voltarListaConfirmados()">Voltar</button></div>
+        <div class="detail-header"><div><span class="card-kicker">Pagamento confirmado</span><h3>{{ pagamentoConfirmadoDetalhe.nomeCompleto }}</h3><p>CPF {{ formatarCpf(pagamentoConfirmadoDetalhe.cpf) }} • Pago em {{ formatarDataHora(pagamentoConfirmadoDetalhe.dataPagamento) }}</p><p>Meio de pagamento: <strong>{{ pagamentoConfirmadoDetalhe.meioPagamento }}</strong></p></div></div>
         <div class="summary-grid"><div><span>Eventos</span><strong>{{ pagamentoConfirmadoDetalhe.quantidadeEventos }}</strong></div><div><span>Total HE</span><strong>{{ pagamentoConfirmadoDetalhe.totalHorasExtras }}</strong></div><div><span>Total pago</span><strong>{{ formatarMoeda(pagamentoConfirmadoDetalhe.valorTotal) }}</strong></div></div>
         <div class="table-scroll"><table><thead><tr><th>Evento</th><th>Data</th><th>Diária</th><th>Valor HE</th><th>Qtd. HE</th><th>Total</th></tr></thead><tbody>@for (item of pagamentoConfirmadoDetalhe.itens; track item.id) { <tr><td><strong>{{ item.nomeEvento }}</strong><small>{{ item.casaNome }}</small></td><td>{{ formatarData(item.dataEvento) }}</td><td>{{ formatarMoeda(item.valorDiariaPago) }}</td><td>{{ formatarMoeda(item.valorHoraExtraPago) }}</td><td>{{ item.quantidadeHorasExtras }}</td><td><strong>{{ formatarMoeda(item.valorTotalItem) }}</strong></td></tr> }</tbody></table></div>
+        <footer class="detail-footer"><button type="button" class="tag-button tag-button-secondary" (click)="voltarListaConfirmados()">Voltar</button></footer>
       </div>
     }
   }

@@ -17,74 +17,24 @@ export const routes: Routes = [
     canActivate: [authGuard],
     canActivateChild: [authChildGuard],
     children: [
-      {
-        path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent)
-      },
-      {
-        path: 'funcionarios',
-        loadComponent: () => import('./features/funcionarios').then((m) => m.FuncionariosComponent)
-      },
-      {
-        path: 'funcoes-funcionario',
-        loadComponent: () => import('./features/funcoes-funcionario').then((m) => m.FuncoesFuncionarioComponent)
-      },
-      {
-        path: 'casas',
-        loadComponent: () => import('./features/casas').then((m) => m.CasasComponent)
-      },
-      {
-        path: 'tipos-evento',
-        loadComponent: () => import('./features/tipos-evento').then((m) => m.TiposEventoComponent)
-      },
-      {
-        path: 'usuarios',
-        loadComponent: () => import('./features/usuarios').then((m) => m.UsuariosComponent)
-      },
-      {
-        path: 'eventos/:id',
-        loadComponent: () => import('./features/eventos/evento-detalhe.component').then((m) => m.EventoDetalheComponent)
-      },
-      {
-        path: 'eventos',
-        loadComponent: () => import('./features/eventos').then((m) => m.EventosComponent)
-      },
-      {
-        path: 'pagamentos',
-        loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Financeiro',
-          title: 'Pagamentos',
-          description: 'Controle de pagamentos.'
-        }
-      },
-      {
-        path: 'relatorios/escalas',
-        loadComponent: () => import('./features/relatorios').then((m) => m.RelatoriosComponent)
-      },
+      { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent) },
+      { path: 'funcionarios', loadComponent: () => import('./features/funcionarios').then((m) => m.FuncionariosComponent) },
+      { path: 'funcoes-funcionario', loadComponent: () => import('./features/funcoes-funcionario').then((m) => m.FuncoesFuncionarioComponent) },
+      { path: 'casas', loadComponent: () => import('./features/casas').then((m) => m.CasasComponent) },
+      { path: 'tipos-evento', loadComponent: () => import('./features/tipos-evento').then((m) => m.TiposEventoComponent) },
+      { path: 'usuarios', loadComponent: () => import('./features/usuarios').then((m) => m.UsuariosComponent) },
+      { path: 'eventos/:id', loadComponent: () => import('./features/eventos/evento-detalhe.component').then((m) => m.EventoDetalheComponent) },
+      { path: 'eventos', loadComponent: () => import('./features/eventos').then((m) => m.EventosComponent) },
+      { path: 'pagamentos', loadComponent: () => import('./features/pagamentos').then((m) => m.PagamentosComponent) },
+      { path: 'relatorios/escalas', loadComponent: () => import('./features/relatorios').then((m) => m.RelatoriosComponent) },
       {
         path: 'relatorios/pagamentos',
         loadComponent: carregarPlaceholder,
-        data: {
-          eyebrow: 'Relatórios',
-          title: 'Relatório de pagamentos',
-          description: 'Será habilitado após a conclusão da aba Pagamentos.'
-        }
+        data: { eyebrow: 'Relatórios', title: 'Relatório de pagamentos', description: 'Será habilitado após a conclusão da aba Pagamentos.' }
       },
-      {
-        path: 'relatorios',
-        pathMatch: 'full',
-        redirectTo: 'relatorios/escalas'
-      },
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'dashboard'
-      }
+      { path: 'relatorios', pathMatch: 'full', redirectTo: 'relatorios/escalas' },
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
     ]
   },
-  {
-    path: '**',
-    redirectTo: 'dashboard'
-  }
+  { path: '**', redirectTo: 'dashboard' }
 ];

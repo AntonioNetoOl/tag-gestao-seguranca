@@ -1,0 +1,374 @@
+.pagamentos-page {
+  display: grid;
+  gap: 22px;
+}
+
+.page-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 28px;
+}
+
+.page-header h2 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  margin: 4px 0 10px;
+}
+
+.page-header p,
+.detail-header p,
+td small {
+  color: var(--tag-muted);
+}
+
+.tabs-card {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  width: fit-content;
+}
+
+.tab-button {
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  color: var(--tag-muted);
+  font-weight: 900;
+  min-height: 42px;
+  padding: 0 18px;
+}
+
+.tab-button.active {
+  background: var(--tag-primary);
+  color: #fff;
+}
+
+.filters {
+  align-items: end;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  padding: 20px;
+}
+
+.confirmados-filters {
+  grid-template-columns: minmax(260px, 1fr) 160px 160px auto;
+}
+
+.filter-actions,
+.detail-footer,
+.feedback-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.table-card,
+.detail-card {
+  overflow: hidden;
+}
+
+.table-toolbar,
+.detail-header {
+  align-items: center;
+  border-bottom: 1px solid var(--tag-border);
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 24px;
+}
+
+.detail-header h3 {
+  font-size: 1.5rem;
+  margin: 4px 0 8px;
+}
+
+.detail-header p {
+  margin: 4px 0 0;
+}
+
+.card-kicker {
+  color: var(--tag-muted);
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  min-width: 1080px;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--tag-border);
+  padding: 16px 24px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--tag-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+td strong,
+td small,
+td span:not(.tag-badge) {
+  display: block;
+}
+
+td small {
+  margin-top: 4px;
+}
+
+.compact {
+  min-height: 38px;
+  padding-inline: 14px;
+}
+
+.state-box {
+  align-items: center;
+  color: var(--tag-muted);
+  display: grid;
+  min-height: 220px;
+  padding: 30px;
+  place-items: center;
+  text-align: center;
+}
+
+.state-box.empty {
+  gap: 8px;
+}
+
+.state-box.empty strong,
+.state-box.empty span {
+  display: block;
+}
+
+.summary-grid {
+  border-bottom: 1px solid var(--tag-border);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 18px 24px;
+}
+
+.summary-grid div {
+  background: #f8fafc;
+  border: 1px solid var(--tag-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.summary-grid span {
+  color: var(--tag-muted);
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.summary-grid strong {
+  display: block;
+  font-size: 1.35rem;
+  margin-top: 6px;
+}
+
+.he-input {
+  background: #fff;
+  border: 1px solid var(--tag-border);
+  border-radius: 10px;
+  max-width: 110px;
+  min-height: 40px;
+  padding: 8px 10px;
+}
+
+.detail-footer,
+.pagination {
+  align-items: center;
+  border-top: 1px solid var(--tag-border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 18px 24px;
+}
+
+.pagination {
+  justify-content: space-between;
+}
+
+.pagination span {
+  color: var(--tag-muted);
+  font-weight: 700;
+}
+
+.pagination div {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.page-size {
+  align-items: center;
+  color: var(--tag-muted);
+  display: inline-flex;
+  font-size: 0.84rem;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.page-size select {
+  background: #ffffff;
+  border: 1px solid var(--tag-border);
+  border-radius: 10px;
+  min-height: 40px;
+  padding: 0 10px;
+}
+
+.feedback-modal {
+  max-width: 560px;
+  padding: 26px;
+}
+
+.feedback-layout {
+  display: grid;
+  gap: 14px;
+}
+
+.feedback-actions {
+  margin-top: 4px;
+}
+
+.success-check,
+.warning-icon {
+  height: 64px;
+  overflow: visible;
+  width: 64px;
+}
+
+.success-check-ring {
+  animation: successRing 0.7s ease-out forwards;
+  fill: none;
+  stroke: #158ccc;
+  stroke-dasharray: 239;
+  stroke-dashoffset: 239;
+  stroke-linecap: round;
+  stroke-width: 7;
+  transform: rotate(-18deg);
+  transform-origin: 48px 48px;
+}
+
+.success-check-mark {
+  animation: successMark 0.45s ease-out 0.45s forwards;
+  fill: none;
+  stroke: #158ccc;
+  stroke-dasharray: 70;
+  stroke-dashoffset: 70;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 9;
+}
+
+.feedback-success .card-kicker {
+  color: #15803d;
+}
+
+.warning-icon circle:first-child {
+  fill: #fff7ed;
+  stroke: #fed7aa;
+  stroke-width: 2;
+}
+
+.warning-icon .warning-pulse {
+  animation: warningPulse 1.5s ease-in-out infinite;
+  fill: none;
+  opacity: 0.35;
+  stroke: #fb923c;
+  stroke-width: 2;
+}
+
+.warning-icon text {
+  fill: #c2410c;
+}
+
+.feedback-error .warning-icon circle:first-child {
+  fill: #fef2f2;
+  stroke: #fecaca;
+}
+
+.feedback-error .warning-icon .warning-pulse {
+  stroke: #ef4444;
+}
+
+.feedback-error .warning-icon text {
+  fill: #b91c1c;
+}
+
+@keyframes successRing {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes successMark {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes warningPulse {
+  0% { opacity: 0.55; r: 23; }
+  100% { opacity: 0; r: 31; }
+}
+
+@media (max-width: 1100px) {
+  .filters,
+  .confirmados-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-actions {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-header,
+  .table-toolbar,
+  .detail-header,
+  .pagination {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tabs-card,
+  .filters,
+  .confirmados-filters,
+  .summary-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .filter-actions,
+  .detail-footer,
+  .pagination div,
+  .feedback-actions {
+    width: 100%;
+  }
+
+  .filter-actions .tag-button,
+  .detail-footer .tag-button,
+  .pagination .tag-button,
+  .feedback-actions .tag-button {
+    flex: 1;
+  }
+}

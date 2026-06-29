@@ -25,6 +25,12 @@ interface AvisoState {
   aoConfirmar?: () => void;
 }
 
+interface SituacaoOperacionalEvento {
+  rotulo: string;
+  classe: string;
+  mensagem?: string;
+}
+
 @Component({
   selector: 'app-eventos-page',
   standalone: true,
@@ -109,6 +115,13 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     this.carregando = true;
     this.erro = '';
 
+    this.eventosService.finalizarVencidos().subscribe({
+      next: () => this.listarEventosOperacao(),
+      error: () => this.listarEventosOperacao()
+    });
+  }
+
+  private listarEventosOperacao(): void {
     this.eventosService.listar({
       nome: this.nome.trim() || undefined,
       casaId: this.casaId || undefined,
@@ -327,6 +340,18 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return evento.status !== 'Cancelado' && evento.status !== 'Finalizado';
   }
 
+  statusOperacionalRotulo(evento: Evento): string {
+    return this.obterSituacaoOperacional(evento).rotulo;
+  }
+
+  classeStatusOperacional(evento: Evento): string {
+    return this.obterSituacaoOperacional(evento).classe;
+  }
+
+  mensagemOperacional(evento: Evento): string | null {
+    return this.obterSituacaoOperacional(evento).mensagem ?? null;
+  }
+
   formatarPeriodoEvento(evento: Evento): string {
     const dataInicio = this.extrairDataUtc(evento.dataEvento);
     if (!dataInicio) return this.formatarData(evento.dataEvento);
@@ -367,6 +392,47 @@ export class EventosPageComponent implements OnInit, OnDestroy {
       Cancelado: 'tag-badge-danger'
     };
     return mapa[status] ?? 'tag-badge-neutral';
+  }
+
+  private obterSituacaoOperacional(evento: Evento): SituacaoOperacionalEvento {
+    if (evento.status === 'Rascunho') {
+      const intervalo = this.obterIntervaloEventoLocal(evento);
+      const agora = new Date();
+
+      if (intervalo && agora >= intervalo.fim) {
+        return {
+          rotulo: 'Rascunho vencido',
+          classe: 'tag-badge-warning status-badge-alerta',
+          mensagem: evento.quantidadeFuncionarios > 0
+            ? 'Evento vencido com equipe, sem escala finalizada.'
+            : 'Evento vencido sem escala finalizada.'
+        };
+      }
+
+      if (intervalo && agora >= intervalo.inicio && agora < intervalo.fim) {
+        return {
+          rotulo: 'Rascunho em andamento',
+          classe: 'tag-badge-warning status-badge-atencao',
+          mensagem: 'Evento em andamento sem escala finalizada.'
+        };
+      }
+    }
+
+    if (evento.status === 'Escalado') {
+      const intervalo = this.obterIntervaloEventoLocal(evento);
+      if (intervalo && new Date() >= intervalo.fim) {
+        return {
+          rotulo: 'Escalado encerrado',
+          classe: 'tag-badge-info status-badge-atencao',
+          mensagem: 'Evento encerrado aguardando finalização automática.'
+        };
+      }
+    }
+
+    return {
+      rotulo: evento.status,
+      classe: this.classeStatus(evento.status)
+    };
   }
 
   private executarExclusao(evento: Evento): void {
@@ -486,6 +552,28 @@ export class EventosPageComponent implements OnInit, OnDestroy {
 
     const [ano, mes, dia] = texto.split('-').map(Number);
     return new Date(Date.UTC(ano, mes - 1, dia));
+  }
+
+  private obterIntervaloEventoLocal(evento: Evento): { inicio: Date; fim: Date } | null {
+    const data = String(evento.dataEvento ?? '').slice(0, 10);
+    const horaInicio = this.formatarHorario(evento.horaInicio);
+    const horaFim = this.formatarHorario(evento.horaFim);
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data) || !/^\d{2}:\d{2}$/.test(horaInicio) || !/^\d{2}:\d{2}$/.test(horaFim)) {
+      return null;
+    }
+
+    const [ano, mes, dia] = data.split('-').map(Number);
+    const [inicioHora, inicioMinuto] = horaInicio.split(':').map(Number);
+    const [fimHora, fimMinuto] = horaFim.split(':').map(Number);
+    const inicio = new Date(ano, mes - 1, dia, inicioHora, inicioMinuto, 0, 0);
+    const fim = new Date(ano, mes - 1, dia, fimHora, fimMinuto, 0, 0);
+
+    if (fim < inicio) {
+      fim.setDate(fim.getDate() + 1);
+    }
+
+    return { inicio, fim };
   }
 
   private formatarDataPorDate(data: Date): string {

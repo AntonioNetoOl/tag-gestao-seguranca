@@ -1,0 +1,95 @@
+<section class="relatorios-page">
+  <div class="reports-grid">
+    <article class="report-card tag-card active-card">
+      <div class="report-card-header">
+        <div>
+          <span class="card-kicker">Pagamentos</span>
+          <h3>Relatório geral de pagamentos</h3>
+          <p>Exporta pagamentos confirmados no período, com resumo por pagamento e detalhamento por evento.</p>
+        </div>
+        <span class="tag-badge tag-badge-info">Disponível</span>
+      </div>
+
+      <form class="filters payment-report-filters" [formGroup]="filtrosPagamentoForm" (ngSubmit)="abrirFormatoPagamento()">
+        <div class="tag-field search-field">
+          <label>Busca</label>
+          <input type="search" formControlName="busca" placeholder="Nome, CPF, RG, evento, casa ou chave Pix" />
+        </div>
+        <div class="tag-field">
+          <label>Data inicial *</label>
+          <input type="date" formControlName="dataInicio" />
+          @if (campoInvalido('dataInicio')) { <small class="field-error">Informe a data inicial.</small> }
+        </div>
+        <div class="tag-field">
+          <label>Data final *</label>
+          <input type="date" formControlName="dataFim" />
+          @if (campoInvalido('dataFim')) { <small class="field-error">Informe a data final.</small> }
+        </div>
+        <div class="filter-actions">
+          <button class="tag-button tag-button-secondary" type="button" (click)="limparFiltrosPagamento()" [disabled]="exportando">Limpar</button>
+          <button class="tag-button tag-button-primary" type="submit" [disabled]="exportando">Emitir Relatório de Pagamentos</button>
+        </div>
+      </form>
+
+      <div class="report-note">
+        <strong>Regra atual:</strong>
+        <span>este relatório considera apenas pagamentos já <b>Confirmados</b>. O período é aplicado pela data do pagamento e inicia automaticamente nos últimos 7 dias.</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+@if (modalFormatoAberto) {
+  <div class="tag-modal-backdrop">
+    <section class="tag-modal relatorio-modal" [class.relatorio-success]="relatorioSucesso">
+      @if (relatorioSucesso) {
+        <div class="feedback-layout relatorio-feedback">
+          <svg class="success-check" viewBox="0 0 96 96" aria-hidden="true"><circle class="success-check-ring" cx="48" cy="48" r="38"></circle><path class="success-check-mark" d="M29 49.5 L42.5 63 L68 35"></path></svg>
+          <div>
+            <span class="card-kicker">Tudo certo</span>
+            <h2>Relatório emitido</h2>
+            <p>O download foi iniciado automaticamente.</p>
+          </div>
+        </div>
+      } @else {
+        <header class="tag-modal-header">
+          <div>
+            <span class="card-kicker">Relatório de pagamentos</span>
+            <h2>Escolha o formato</h2>
+          </div>
+          <button type="button" class="modal-close" (click)="fecharFormatoPagamento()">×</button>
+        </header>
+        <div class="tag-modal-body">
+          <p>Selecione como deseja emitir o relatório geral de pagamentos.</p>
+        </div>
+        <footer class="tag-modal-footer report-actions">
+          <button type="button" class="tag-button tag-button-secondary" (click)="emitirPagamento('excel')" [disabled]="exportando">{{ exportando ? 'Emitindo...' : 'Excel' }}</button>
+          <button type="button" class="tag-button tag-button-primary" (click)="emitirPagamento('pdf')" [disabled]="exportando">{{ exportando ? 'Emitindo...' : 'PDF' }}</button>
+        </footer>
+      }
+    </section>
+  </div>
+}
+
+@if (aviso) {
+  <div class="tag-modal-backdrop">
+    <section class="tag-modal feedback-modal" [class.feedback-success]="aviso.tipo === 'sucesso'" [class.feedback-error]="aviso.tipo === 'erro'">
+      <div class="feedback-layout">
+        @if (aviso.tipo === 'sucesso') {
+          <svg class="success-check" viewBox="0 0 96 96" aria-hidden="true"><circle class="success-check-ring" cx="48" cy="48" r="38"></circle><path class="success-check-mark" d="M29 49.5 L42.5 63 L68 35"></path></svg>
+        } @else {
+          <svg class="warning-icon" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24"></circle><circle class="warning-pulse" cx="32" cy="32" r="26"></circle><text x="32" y="41" text-anchor="middle" font-size="30" font-weight="900">!</text></svg>
+        }
+        <div>
+          <span class="card-kicker">{{ aviso.tipo === 'sucesso' ? 'Tudo certo' : 'Atenção necessária' }}</span>
+          <h2>{{ aviso.titulo }}</h2>
+          <p>{{ aviso.mensagem }}</p>
+          @if (aviso.detalhe) { <small>{{ aviso.detalhe }}</small> }
+        </div>
+        <footer class="feedback-actions">
+          @if (aviso.tipo !== 'sucesso') { <button type="button" class="tag-button tag-button-primary" (click)="fecharAviso()">Entendi</button> }
+        </footer>
+      </div>
+    </section>
+  </div>
+}

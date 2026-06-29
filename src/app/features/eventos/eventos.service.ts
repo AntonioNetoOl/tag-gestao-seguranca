@@ -34,6 +34,10 @@ export class EventosService {
     return this.http.get<PagedResponse<Evento>>(this.apiUrl, { params: httpParams });
   }
 
+  finalizarVencidos(): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/finalizar-vencidos`, null);
+  }
+
   obter(id: string): Observable<Evento> {
     return this.http.get<Evento>(`${this.apiUrl}/${id}`);
   }

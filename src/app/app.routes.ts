@@ -3,9 +3,6 @@ import { Routes } from '@angular/router';
 import { authChildGuard, authGuard } from './core/auth/auth.guard';
 import { ShellComponent } from './core/layout/shell.component';
 
-const carregarPlaceholder = () =>
-  import('./features/placeholder/placeholder.component').then((m) => m.PlaceholderComponent);
-
 export const routes: Routes = [
   {
     path: 'login',
@@ -27,11 +24,7 @@ export const routes: Routes = [
       { path: 'eventos', loadComponent: () => import('./features/eventos').then((m) => m.EventosComponent) },
       { path: 'pagamentos', loadComponent: () => import('./features/pagamentos').then((m) => m.PagamentosComponent) },
       { path: 'relatorios/escalas', loadComponent: () => import('./features/relatorios').then((m) => m.RelatoriosComponent) },
-      {
-        path: 'relatorios/pagamentos',
-        loadComponent: carregarPlaceholder,
-        data: { eyebrow: 'Relatórios', title: 'Relatório de pagamentos', description: 'Será habilitado após a conclusão da aba Pagamentos.' }
-      },
+      { path: 'relatorios/pagamentos', loadComponent: () => import('./features/relatorios/relatorios-pagamentos.component').then((m) => m.RelatoriosPagamentosComponent) },
       { path: 'relatorios', pathMatch: 'full', redirectTo: 'relatorios/escalas' },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
     ]

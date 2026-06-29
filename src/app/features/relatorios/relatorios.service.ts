@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { RelatorioEscalaFiltros } from './relatorios.models';
+import { RelatorioEscalaFiltros, RelatorioPagamentoFiltros } from './relatorios.models';
 
 @Injectable({ providedIn: 'root' })
 export class RelatoriosService {
@@ -24,6 +24,20 @@ export class RelatoriosService {
     });
   }
 
+  exportarPagamentosExcel(filtros: RelatorioPagamentoFiltros): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/pagamentos/excel`, {
+      params: this.montarParamsPagamento(filtros),
+      responseType: 'blob'
+    });
+  }
+
+  exportarPagamentosPdf(filtros: RelatorioPagamentoFiltros): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/pagamentos/pdf`, {
+      params: this.montarParamsPagamento(filtros),
+      responseType: 'blob'
+    });
+  }
+
   private montarParamsEscala(filtros: RelatorioEscalaFiltros): HttpParams {
     let params = new HttpParams()
       .set('dataInicio', filtros.dataInicio)
@@ -31,6 +45,16 @@ export class RelatoriosService {
 
     if (filtros.casaId) params = params.set('casaId', filtros.casaId);
     if (filtros.nomeEvento?.trim()) params = params.set('nomeEvento', filtros.nomeEvento.trim());
+
+    return params;
+  }
+
+  private montarParamsPagamento(filtros: RelatorioPagamentoFiltros): HttpParams {
+    let params = new HttpParams()
+      .set('dataInicio', filtros.dataInicio)
+      .set('dataFim', filtros.dataFim);
+
+    if (filtros.busca?.trim()) params = params.set('busca', filtros.busca.trim());
 
     return params;
   }

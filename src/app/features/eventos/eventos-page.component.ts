@@ -208,7 +208,7 @@ export class EventosPageComponent implements OnInit, OnDestroy {
   formatarHorario(valor: string): string { return String(valor ?? '').slice(0, 5) || '-'; }
   formatarMoeda(valor: number): string { return this.formatarMoedaInput(valor); }
 
-  classeStatus(status: EventoStatus): string {
+  classeStatus(status: string): string {
     const mapa: Record<string, string> = { Rascunho: 'tag-badge-neutral', 'Rascunho em andamento': 'tag-badge-warning', 'Rascunho vencido': 'tag-badge-warning', Escalado: 'tag-badge-info', 'Escalado encerrado': 'tag-badge-warning', Finalizado: 'tag-badge-success', Cancelado: 'tag-badge-danger' };
     return mapa[status] ?? 'tag-badge-neutral';
   }
@@ -232,10 +232,10 @@ export class EventosPageComponent implements OnInit, OnDestroy {
     return { rotulo: status, classe: this.classeStatus(status) };
   }
 
-  private normalizarStatusPersistido(status: EventoStatus): EventoStatus {
+  private normalizarStatusPersistido(status: string): EventoStatus {
     if (status === 'Rascunho em andamento' || status === 'Rascunho vencido') return 'Rascunho';
     if (status === 'Escalado encerrado') return 'Escalado';
-    return status;
+    return status as EventoStatus;
   }
 
   private executarExclusao(evento: Evento): void { this.erro = ''; this.eventosService.cancelar(evento.id).subscribe({ next: () => { this.abrirSucesso('Evento excluído', 'Evento removido da listagem operacional.'); this.carregarEventos(); }, error: (error: unknown) => { const mensagem = obterMensagemErroApi(error); this.erro = mensagem; this.abrirErro('Não foi possível excluir', mensagem); } }); }

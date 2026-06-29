@@ -1,12 +1,4 @@
 <section class="pagamentos-page">
-  <div class="page-header tag-card">
-    <div>
-      <span class="eyebrow">Financeiro</span>
-      <h2>Pagamentos</h2>
-      <p>Gerencie pendências de funcionários e consulte pagamentos confirmados.</p>
-    </div>
-  </div>
-
   <div class="tabs-card tag-card">
     <button type="button" class="tab-button" [class.active]="abaAtiva === 'pendentes'" (click)="selecionarAba('pendentes')">Pendentes</button>
     <button type="button" class="tab-button" [class.active]="abaAtiva === 'confirmados'" (click)="selecionarAba('confirmados')">Confirmados</button>

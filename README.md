@@ -75,14 +75,7 @@ Depois acesse:
 http://localhost:4200/login
 ```
 
-Credenciais locais usadas durante o desenvolvimento:
-
-```json
-{
-  "email": "admin@tag.com",
-  "senha": "Admin@123456"
-}
-```
+O usuário administrativo deve ser configurado no ambiente local/backend. Credenciais reais ou de desenvolvimento não são mantidas neste README.
 
 ## URL local da API
 
